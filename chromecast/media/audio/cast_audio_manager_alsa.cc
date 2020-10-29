@@ -30,13 +30,12 @@ const int kDefaultInputBufferSize = 1024;
 const int kCommunicationsSampleRate = 16000;
 const int kCommunicationsInputBufferSize = 160;  // 10 ms.
 
-// Since "default" and "dmix" devices are virtual devices mapped to real
-// devices, we remove them from the list to avoiding duplicate counting.
-constexpr base::StringPiece kInvalidAudioInputDevices[] = {
-    "default",
-    "dmix",
-    "null",
-    "communications",
+// Since "default", "pulse" and "dmix" devices are virtual devices mapped to
+// real devices, we remove them from the list to avoiding duplicate counting.
+// In addition, note that we support no more than 2 channels for recording,
+// hence surround devices are not stored in the list.
+static const char* kInvalidAudioInputDevices[] = {
+    "default", "dmix", "null", "communications", "pulse", "surround", "dsnoop", "hw", "front", "plughw"
 };
 
 // Constants specified by the ALSA API for device hints.
@@ -179,7 +178,8 @@ void CastAudioManagerAlsa::GetAlsaAudioDevices(
   int card = -1;
 
   // Loop through the sound cards to get ALSA device hints.
-  while (!wrapper_->CardNext(&card) && card >= 0) {
+//  while (!wrapper_->CardNext(&card) && card >= 0)
+  {
     void** hints = NULL;
     int error = wrapper_->DeviceNameHint(card, kPcmInterfaceName, &hints);
     if (!error) {
@@ -206,7 +206,7 @@ void CastAudioManagerAlsa::GetAlsaDevicesInfo(
     // "Input", "Output", and NULL which means both input and output.
     std::unique_ptr<char, base::FreeDeleter> io(
         wrapper_->DeviceNameGetHint(*hint_iter, kIoHintName));
-    if (io && unwanted_device_type == io.get())
+    if (io == NULL || strcmp(unwanted_device_type, io.get()) == 0)
       continue;
 
     // Get the unique device name for the device.
