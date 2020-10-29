@@ -568,6 +568,7 @@ void ConvertVideoFrameToRGBPixelsTask(const VideoFrame* video_frame,
     case PIXEL_FORMAT_P016LE:
     case PIXEL_FORMAT_XR30:
     case PIXEL_FORMAT_XB30:
+    case PIXEL_FORMAT_H264:
     case PIXEL_FORMAT_UNKNOWN:
       NOTREACHED() << "Only YUV formats and Y16 are supported, got: "
                    << media::VideoPixelFormatToString(format);
@@ -1203,6 +1204,35 @@ void PaintCanvasVideoRenderer::ConvertVideoFrameToRGBPixels(
   {
     base::ScopedAllowBaseSyncPrimitivesOutsideBlockingScope allow_wait;
     event.Wait();
+#if 0
+=======
+    case PIXEL_FORMAT_NV12:
+      LIBYUV_NV12_TO_ARGB(video_frame->visible_data(VideoFrame::kYPlane),
+                          video_frame->stride(VideoFrame::kYPlane),
+                          video_frame->visible_data(VideoFrame::kUVPlane),
+                          video_frame->stride(VideoFrame::kUVPlane),
+                          static_cast<uint8_t*>(rgb_pixels), row_bytes,
+                          video_frame->visible_rect().width(),
+                          video_frame->visible_rect().height());
+      break;
+
+    case PIXEL_FORMAT_NV21:
+    case PIXEL_FORMAT_UYVY:
+    case PIXEL_FORMAT_YUY2:
+    case PIXEL_FORMAT_ARGB:
+    case PIXEL_FORMAT_XRGB:
+    case PIXEL_FORMAT_RGB24:
+    case PIXEL_FORMAT_RGB32:
+    case PIXEL_FORMAT_MJPEG:
+    case PIXEL_FORMAT_MT21:
+    case PIXEL_FORMAT_ABGR:
+    case PIXEL_FORMAT_XBGR:
+    case PIXEL_FORMAT_H264:
+    case PIXEL_FORMAT_UNKNOWN:
+      NOTREACHED() << "Only YUV formats and Y16 are supported, got: "
+                   << media::VideoPixelFormatToString(video_frame->format());
+>>>>>>> 2764d58350715... Added H.264 capture support.
+#endif
   }
 }
 

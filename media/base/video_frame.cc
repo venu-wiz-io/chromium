@@ -146,6 +146,7 @@ gfx::Size VideoFrame::SampleSize(VideoPixelFormat format, size_t plane) {
         case PIXEL_FORMAT_XR30:
         case PIXEL_FORMAT_XB30:
         case PIXEL_FORMAT_BGRA:
+        case PIXEL_FORMAT_H264:
           break;
       }
   }
@@ -199,6 +200,7 @@ static bool RequiresEvenSizeAllocation(VideoPixelFormat format) {
     case PIXEL_FORMAT_I420A:
     case PIXEL_FORMAT_UYVY:
     case PIXEL_FORMAT_P016LE:
+    case PIXEL_FORMAT_H264:
       return true;
     case PIXEL_FORMAT_UNKNOWN:
       break;
@@ -213,6 +215,7 @@ static base::Optional<VideoFrameLayout> GetDefaultLayout(
     const gfx::Size& coded_size) {
   std::vector<ColorPlaneLayout> planes;
 
+//  std::vector<VideoFrameLayout::Plane> planes;
   switch (format) {
     case PIXEL_FORMAT_I420: {
       int uv_width = (coded_size.width() + 1) / 2;
@@ -236,6 +239,12 @@ static base::Optional<VideoFrameLayout> GetDefaultLayout(
       planes = std::vector<ColorPlaneLayout>{ColorPlaneLayout(
           coded_size.width() * 4, 0, coded_size.GetArea() * 4)};
       break;
+    case PIXEL_FORMAT_H264:
+      planes = std::vector<ColorPlaneLayout>{ColorPlaneLayout(
+          coded_size.width() * 4, 0, coded_size.GetArea() * 4)};
+//      planes = std::vector<VideoFrameLayout::Plane>{
+//          VideoFrameLayout::Plane(coded_size.width() * 4, 0)};
+      break;
 
     case PIXEL_FORMAT_NV12: {
       int uv_width = (coded_size.width() + 1) / 2;
@@ -258,7 +267,6 @@ static base::Optional<VideoFrameLayout> GetDefaultLayout(
           << VideoPixelFormatToString(format);
       return base::nullopt;
   }
-
   return VideoFrameLayout::CreateWithPlanes(format, coded_size, planes);
 }
 
@@ -309,7 +317,7 @@ bool VideoFrame::IsValidConfig(VideoPixelFormat format,
     return true;
 
   // Make sure new formats are properly accounted for in the method.
-  static_assert(PIXEL_FORMAT_MAX == 32,
+  static_assert(PIXEL_FORMAT_MAX == 33,
                 "Added pixel format, please review IsValidConfig()");
 
   if (format == PIXEL_FORMAT_UNKNOWN) {
@@ -1014,6 +1022,7 @@ int VideoFrame::BytesPerElement(VideoPixelFormat format, size_t plane) {
     case PIXEL_FORMAT_I422:
     case PIXEL_FORMAT_I420A:
     case PIXEL_FORMAT_I444:
+    case PIXEL_FORMAT_H264:
       return 1;
     case PIXEL_FORMAT_MJPEG:
       return 0;
@@ -1377,6 +1386,67 @@ scoped_refptr<VideoFrame> VideoFrame::CreateFrameWithLayout(
   frame->AllocateMemory(zero_initialize_memory);
   return frame;
 }
+
+#if 0
+bool VideoFrame::SharedMemoryUninitialized() {
+  return !read_only_shared_memory_region_ && !unsafe_shared_memory_region_ &&
+         !shared_memory_handle_.IsValid();
+}
+
+// static
+gfx::Size VideoFrame::SampleSize(VideoPixelFormat format, size_t plane) {
+  DCHECK(IsValidPlane(plane, format));
+
+  switch (plane) {
+    case kYPlane:  // and kARGBPlane:
+    case kAPlane:
+      return gfx::Size(1, 1);
+
+    case kUPlane:  // and kUVPlane:
+    case kVPlane:
+      switch (format) {
+        case PIXEL_FORMAT_I444:
+        case PIXEL_FORMAT_YUV444P9:
+        case PIXEL_FORMAT_YUV444P10:
+        case PIXEL_FORMAT_YUV444P12:
+        case PIXEL_FORMAT_Y16:
+          return gfx::Size(1, 1);
+
+        case PIXEL_FORMAT_I422:
+        case PIXEL_FORMAT_YUV422P9:
+        case PIXEL_FORMAT_YUV422P10:
+        case PIXEL_FORMAT_YUV422P12:
+          return gfx::Size(2, 1);
+
+        case PIXEL_FORMAT_YV12:
+        case PIXEL_FORMAT_I420:
+        case PIXEL_FORMAT_I420A:
+        case PIXEL_FORMAT_NV12:
+        case PIXEL_FORMAT_NV21:
+        case PIXEL_FORMAT_MT21:
+        case PIXEL_FORMAT_YUV420P9:
+        case PIXEL_FORMAT_YUV420P10:
+        case PIXEL_FORMAT_YUV420P12:
+          return gfx::Size(2, 2);
+
+        case PIXEL_FORMAT_UNKNOWN:
+        case PIXEL_FORMAT_UYVY:
+        case PIXEL_FORMAT_YUY2:
+        case PIXEL_FORMAT_ARGB:
+        case PIXEL_FORMAT_XRGB:
+        case PIXEL_FORMAT_RGB24:
+        case PIXEL_FORMAT_RGB32:
+        case PIXEL_FORMAT_MJPEG:
+        case PIXEL_FORMAT_ABGR:
+        case PIXEL_FORMAT_XBGR:
+        case PIXEL_FORMAT_H264:
+          break;
+      }
+  }
+  NOTREACHED();
+  return gfx::Size();
+}
+#endif
 
 // static
 gfx::Size VideoFrame::CommonAlignment(VideoPixelFormat format) {

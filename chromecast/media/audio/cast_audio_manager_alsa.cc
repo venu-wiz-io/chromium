@@ -206,7 +206,7 @@ void CastAudioManagerAlsa::GetAlsaDevicesInfo(
     // "Input", "Output", and NULL which means both input and output.
     std::unique_ptr<char, base::FreeDeleter> io(
         wrapper_->DeviceNameGetHint(*hint_iter, kIoHintName));
-    if (io == NULL || strcmp(unwanted_device_type, io.get()) == 0)
+    if (io == NULL || strcmp(unwanted_device_type.c_str(), io.get()) == 0)
       continue;
 
     // Get the unique device name for the device.
