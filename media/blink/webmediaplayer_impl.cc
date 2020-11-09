@@ -1040,6 +1040,13 @@ void WebMediaPlayerImpl::SetLatencyHint(double seconds) {
   pipeline_controller_->SetLatencyHint(latency_hint);
 }
 
+void WebMediaPlayerImpl::SetSecondary(bool secondary) {
+  DVLOG(1) << __func__ << "(" << secondary << ")";
+  DCHECK(main_task_runner_->BelongsToCurrentThread());
+  secondary_ = secondary;
+  pipeline_controller_->SetSecondary(secondary);
+}
+
 void WebMediaPlayerImpl::SetPreservesPitch(bool preserves_pitch) {
   DCHECK(main_task_runner_->BelongsToCurrentThread());
   pipeline_controller_->SetPreservesPitch(preserves_pitch);

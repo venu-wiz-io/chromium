@@ -1327,6 +1327,7 @@ void HTMLMediaElement::StartPlayerLoad() {
   // wrapper.
   audio_source_provider_.Wrap(web_media_player_->GetAudioSourceProvider());
   web_media_player_->SetVolume(EffectiveMediaVolume());
+  web_media_player_->SetSecondary(this->secondary_);
 
   web_media_player_->SetPoster(PosterImageURL());
 

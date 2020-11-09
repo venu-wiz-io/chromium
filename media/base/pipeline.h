@@ -229,6 +229,9 @@ class MEDIA_EXPORT Pipeline {
   // different than 1.0.
   virtual void SetPreservesPitch(bool preserves_pitch) = 0;
 
+  // Attempt to set the secondary attribure of the video renderer.
+  virtual void SetSecondary(bool secondary) = 0;
+
   // Returns the current media playback time, which progresses from 0 until
   // GetMediaDuration().
   virtual base::TimeDelta GetMediaTime() const = 0;

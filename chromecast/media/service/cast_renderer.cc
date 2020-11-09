@@ -243,7 +243,7 @@ void CastRenderer::OnGetMultiroomInfo(
 
     ::media::PipelineStatus status = pipeline_->InitializeAudio(
         audio_stream->audio_decoder_config(), std::move(audio_client),
-        std::move(frame_provider));
+        std::move(frame_provider), pending_secondary_.value());
     if (status != ::media::PIPELINE_OK) {
       RunInitCallback(status);
       return;
@@ -272,7 +272,8 @@ void CastRenderer::OnGetMultiroomInfo(
         task_runner_, media_task_runner_factory_, video_stream));
 
     ::media::PipelineStatus status = pipeline_->InitializeVideo(
-        video_configs, std::move(video_client), std::move(frame_provider));
+        video_configs, std::move(video_client), std::move(frame_provider),
+        pending_secondary_.value());
     if (status != ::media::PIPELINE_OK) {
       RunInitCallback(status);
       return;
@@ -375,6 +376,19 @@ void CastRenderer::SetVolume(float volume) {
 
   pipeline_->SetVolume(volume);
 }
+
+void CastRenderer::SetSecondary(bool secondary) {
+  DCHECK(task_runner_->BelongsToCurrentThread());
+  // If pipeline is not initialized, cache the volume and delay the secondary set
+  // until media pipeline is setup.
+  if (!pipeline_) {
+    pending_secondary_ = secondary;
+    return;
+  }
+
+  pipeline_->SetSecondary(secondary);
+}
+
 
 base::TimeDelta CastRenderer::GetMediaTime() {
   DCHECK(task_runner_->BelongsToCurrentThread());

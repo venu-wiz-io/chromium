@@ -160,6 +160,7 @@ class WebMediaPlayer {
   virtual void Seek(double seconds) = 0;
   virtual void SetRate(double) = 0;
   virtual void SetVolume(double) = 0;
+  virtual void SetSecondary(bool) = 0;
 
   // Set a target value for media pipeline latency for post-decode buffering.
   // |seconds| is a target value for post-decode buffering latency. As a default

@@ -75,6 +75,8 @@ class MEDIA_EXPORT VideoRendererImpl
   void OnTimeStopped() override;
   void SetLatencyHint(base::Optional<base::TimeDelta> latency_hint) override;
 
+  void SetSecondary(bool secondary) override;
+
   void SetTickClockForTesting(const base::TickClock* tick_clock);
   size_t frames_queued_for_testing() const {
     return algorithm_->frames_queued();

@@ -771,6 +771,10 @@ void WebMediaPlayerMS::SetVolume(double volume) {
   delegate_->DidPlayerMutedStatusChange(delegate_id_, volume == 0.0);
 }
 
+void WebMediaPlayerMS::SetSecondary(bool secondary) {
+  NOTIMPLEMENTED();
+}
+
 void WebMediaPlayerMS::SetLatencyHint(double seconds) {
   // WebRTC latency has separate latency APIs, focused more on network jitter
   // and implemented inside the WebRTC stack.

@@ -194,6 +194,11 @@ bool HTMLVideoElement::IsPresentationAttribute(
 
 void HTMLVideoElement::ParseAttribute(
     const AttributeModificationParams& params) {
+
+  if (params.name == html_names::kSecondaryAttr) {
+    this->secondary_ = (params.new_value != "false");
+  }
+
   if (params.name == html_names::kPosterAttr) {
     UpdatePosterImage();
 
@@ -237,6 +242,11 @@ unsigned HTMLVideoElement::videoHeight() const {
     return 0;
   return GetWebMediaPlayer()->NaturalSize().height();
 }
+
+unsigned HTMLVideoElement::videoSecondary() const {
+    return this->secondary_;
+}
+
 
 IntSize HTMLVideoElement::videoVisibleSize() const {
   return GetWebMediaPlayer() ? IntSize(GetWebMediaPlayer()->VisibleSize())

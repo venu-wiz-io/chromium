@@ -123,6 +123,10 @@ void MojoRendererService::SetVolume(float volume) {
   renderer_->SetVolume(volume);
 }
 
+void MojoRendererService::SetSecondary(bool secondary) {
+  renderer_->SetSecondary(secondary);
+}
+
 void MojoRendererService::SetCdm(
     const base::Optional<base::UnguessableToken>& cdm_id,
     SetCdmCallback callback) {

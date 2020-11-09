@@ -68,6 +68,7 @@ class CastRenderer : public ::media::Renderer,
   void StartPlayingFrom(base::TimeDelta time) final;
   void SetPlaybackRate(double playback_rate) final;
   void SetVolume(float volume) final;
+  void SetSecondary(bool secondary) final;
   base::TimeDelta GetMediaTime() final;
 
   // VideoResolutionPolicy::Observer implementation.
@@ -143,6 +144,7 @@ class CastRenderer : public ::media::Renderer,
   }
 
   base::Optional<float> pending_volume_;
+  base::Optional<bool> pending_secondary_;
 
   base::WeakPtrFactory<CastRenderer> weak_factory_;
   DISALLOW_COPY_AND_ASSIGN(CastRenderer);

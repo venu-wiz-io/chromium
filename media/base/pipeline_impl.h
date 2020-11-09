@@ -105,6 +105,7 @@ class MEDIA_EXPORT PipelineImpl : public Pipeline {
   void SetVolume(float volume) override;
   void SetLatencyHint(base::Optional<base::TimeDelta> latency_hint) override;
   void SetPreservesPitch(bool preserves_pitch) override;
+  void SetSecondary(bool secondary) override;
   base::TimeDelta GetMediaTime() const override;
   Ranges<base::TimeDelta> GetBufferedTimeRanges() const override;
   base::TimeDelta GetMediaDuration() const override;
@@ -196,6 +197,9 @@ class MEDIA_EXPORT PipelineImpl : public Pipeline {
   // via SetVolume() and a task is dispatched on the task runner to notify the
   // filters.
   float volume_;
+
+  // Secondary attribute of the "video" tag
+  bool secondary_;
 
   // Current duration as reported by Demuxer.
   base::TimeDelta duration_;

@@ -133,6 +133,7 @@ class MEDIA_EXPORT PipelineController {
   void SetVolume(float volume);
   void SetLatencyHint(base::Optional<base::TimeDelta> latency_hint);
   void SetPreservesPitch(bool preserves_pitch);
+  void SetSecondary(bool secondary);
   base::TimeDelta GetMediaTime() const;
   Ranges<base::TimeDelta> GetBufferedTimeRanges() const;
   base::TimeDelta GetMediaDuration() const;

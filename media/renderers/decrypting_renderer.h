@@ -52,6 +52,7 @@ class MEDIA_EXPORT DecryptingRenderer : public Renderer {
   void StartPlayingFrom(base::TimeDelta time) override;
   void SetPlaybackRate(double playback_rate) override;
   void SetVolume(float volume) override;
+  void SetSecondary(bool secondary) override;
   base::TimeDelta GetMediaTime() override;
   void OnSelectedVideoTracksChanged(
       const std::vector<DemuxerStream*>& enabled_tracks,

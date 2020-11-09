@@ -295,6 +295,7 @@
     "scrollamount",
     "scrolldelay",
     "scrolling",
+    "secondary",
     "select",
     "selected",
     "shadowroot",

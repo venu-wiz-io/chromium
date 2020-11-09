@@ -64,6 +64,7 @@ class MEDIA_MOJO_EXPORT MojoRendererService : public mojom::Renderer,
   void StartPlayingFrom(base::TimeDelta time_delta) final;
   void SetPlaybackRate(double playback_rate) final;
   void SetVolume(float volume) final;
+  void SetSecondary(bool secondary) final;
   void SetCdm(const base::Optional<base::UnguessableToken>& cdm_id,
               SetCdmCallback callback) final;
 

@@ -100,6 +100,9 @@ void Receiver::SetPlaybackRate(double playback_rate) {}
 void Receiver::SetVolume(float volume) {}
 
 // No-op. Controlled by sender via RPC calls instead.
+void Receiver::SetSecondary(bool secondary) {}
+
+// No-op. Controlled by sender via RPC calls instead.
 base::TimeDelta Receiver::GetMediaTime() {
   return base::TimeDelta();
 }

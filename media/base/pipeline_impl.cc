@@ -71,6 +71,7 @@ class PipelineImpl::RendererWrapper : public DemuxerHost,
   void SetVolume(float volume);
   void SetLatencyHint(base::Optional<base::TimeDelta> latency_hint);
   void SetPreservesPitch(bool preserves_pitch);
+  void SetSecondary(bool secondary);
   base::TimeDelta GetMediaTime() const;
   Ranges<base::TimeDelta> GetBufferedTimeRanges() const;
   bool DidLoadingProgress();
@@ -192,6 +193,7 @@ class PipelineImpl::RendererWrapper : public DemuxerHost,
   double playback_rate_;
   float volume_;
   base::Optional<base::TimeDelta> latency_hint_;
+  bool secondary_;
   CdmContext* cdm_context_;
 
   // By default, apply pitch adjustments.
@@ -495,6 +497,14 @@ void PipelineImpl::RendererWrapper::SetPreservesPitch(bool preserves_pitch) {
   preserves_pitch_ = preserves_pitch;
   if (shared_state_.renderer)
     shared_state_.renderer->SetPreservesPitch(preserves_pitch_);
+}
+
+void PipelineImpl::RendererWrapper::SetSecondary(bool secondary) {
+  DCHECK(media_task_runner_->BelongsToCurrentThread());
+
+  secondary_ = secondary;
+  if (state_ == kPlaying)
+    shared_state_.renderer->SetSecondary(secondary_);
 }
 
 base::TimeDelta PipelineImpl::RendererWrapper::GetMediaTime() const {
@@ -1062,6 +1072,8 @@ void PipelineImpl::RendererWrapper::InitializeRenderer(
   shared_state_.renderer->SetVolume(volume_);
 
   shared_state_.renderer->Initialize(demuxer_, this, std::move(done_cb));
+
+  shared_state_.renderer->SetSecondary(secondary_);
 }
 
 void PipelineImpl::RendererWrapper::DestroyRenderer() {
@@ -1384,6 +1396,17 @@ void PipelineImpl::SetPreservesPitch(bool preserves_pitch) {
       FROM_HERE, base::BindOnce(&RendererWrapper::SetPreservesPitch,
                                 base::Unretained(renderer_wrapper_.get()),
                                 preserves_pitch));
+}
+
+void PipelineImpl::SetSecondary(bool secondary) {
+  DVLOG(2) << __func__ << "(" << secondary << ")";
+  DCHECK(thread_checker_.CalledOnValidThread());
+
+  secondary_ = secondary;
+  media_task_runner_->PostTask(
+      FROM_HERE,
+      base::BindOnce(&RendererWrapper::SetSecondary,
+                     base::Unretained(renderer_wrapper_.get()), secondary_));
 }
 
 base::TimeDelta PipelineImpl::GetMediaTime() const {

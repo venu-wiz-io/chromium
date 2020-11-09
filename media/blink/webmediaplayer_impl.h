@@ -130,6 +130,7 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerImpl
   void SetRate(double rate) override;
   void SetVolume(double volume) override;
   void SetLatencyHint(double seconds) override;
+  void SetSecondary(bool secondary) override;
   void SetPreservesPitch(bool preserves_pitch) override;
   void OnRequestPictureInPicture() override;
   void OnTimeUpdate() override;
@@ -839,6 +840,7 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerImpl
   // if the WebMediaPlayerDelegate has requested a volume reduction (ducking)
   // for a transient sound.  Playout volume is derived by volume * multiplier.
   double volume_ = 1.0;
+  bool secondary_ = false;
   double volume_multiplier_ = 1.0;
 
   std::unique_ptr<RendererFactorySelector> renderer_factory_selector_;

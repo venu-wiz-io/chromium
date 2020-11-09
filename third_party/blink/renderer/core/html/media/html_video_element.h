@@ -69,6 +69,7 @@ class CORE_EXPORT HTMLVideoElement final
 
   unsigned videoWidth() const;
   unsigned videoHeight() const;
+  unsigned videoSecondary() const;
 
   IntSize videoVisibleSize() const;
 

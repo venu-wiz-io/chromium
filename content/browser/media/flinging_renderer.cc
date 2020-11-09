@@ -127,6 +127,10 @@ void FlingingRenderer::SetExpectedPlayState(PlayState state) {
   play_state_is_stable_ = (expected_play_state_ == last_play_state_received_);
 }
 
+void FlingingRenderer::SetSecondary(bool secondary) {
+  DVLOG(2) << __func__;
+}
+
 void FlingingRenderer::OnMediaStatusUpdated(const media::MediaStatus& status) {
   const auto& current_state = status.state;
 

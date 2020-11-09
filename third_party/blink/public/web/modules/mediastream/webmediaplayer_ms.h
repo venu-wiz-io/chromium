@@ -112,6 +112,7 @@ class BLINK_MODULES_EXPORT WebMediaPlayerMS
   void Seek(double seconds) override;
   void SetRate(double rate) override;
   void SetVolume(double volume) override;
+  void SetSecondary(bool secondary) override;
   void SetLatencyHint(double seconds) override;
   void SetPreservesPitch(bool preserves_pitch) override;
   void OnRequestPictureInPicture() override;

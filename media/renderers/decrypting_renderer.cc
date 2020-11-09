@@ -131,6 +131,10 @@ void DecryptingRenderer::SetVolume(float volume) {
   renderer_->SetVolume(volume);
 }
 
+void DecryptingRenderer::SetSecondary(bool secondary) {
+  renderer_->SetSecondary(secondary);
+}
+
 base::TimeDelta DecryptingRenderer::GetMediaTime() {
   return renderer_->GetMediaTime();
 }
