@@ -4120,12 +4120,14 @@ void WebMediaPlayerMsCma::SwitchToLocalRenderer(
 }
 
 void WebMediaPlayerMsCma::RecordUnderflowDuration(base::TimeDelta duration) {
-  DCHECK(data_source_ || chunk_demuxer_);
+  DCHECK(!web_stream_.IsNull() || data_source_ || chunk_demuxer_);
 
   if (data_source_)
     UMA_HISTOGRAM_TIMES("Media.UnderflowDuration2.SRC", duration);
-  else
+  else if(chunk_demuxer_)
     UMA_HISTOGRAM_TIMES("Media.UnderflowDuration2.MSE", duration);
+  else
+    UMA_HISTOGRAM_TIMES("Media.UnderflowDuration2.WEB", duration);
 
   if (is_encrypted_)
     UMA_HISTOGRAM_TIMES("Media.UnderflowDuration2.EME", duration);

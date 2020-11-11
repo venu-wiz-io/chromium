@@ -10,7 +10,7 @@
 #include "mojo/public/cpp/system/platform_handle.h"
 #include "ui/gfx/geometry/size.h"
 
-namespace {
+namespace media {
 
 // A local VideoCaptureBufferHandle implementation used with
 // GetHandleForInProcessAccess. This does not own the mapping, so the tracker
@@ -31,11 +31,14 @@ class SharedMemoryBufferTrackerHandle : public media::VideoCaptureBufferHandle {
   uint8_t* data_;
 };
 
-size_t CalculateRequiredBufferSize(
+size_t SharedMemoryBufferTracker::CalculateRequiredBufferSize(
     const gfx::Size& dimensions,
     media::VideoPixelFormat format,
     const media::mojom::PlaneStridesPtr& strides) {
-  if (strides) {
+  if(format == media::PIXEL_FORMAT_H264) {
+    //VINOD: It is a hack to save memory. Fix it.
+    return dimensions.width();
+  } else if (strides) {
     size_t result = 0u;
     for (size_t plane_index = 0;
          plane_index < media::VideoFrame::NumPlanes(format); plane_index++) {
@@ -49,10 +52,6 @@ size_t CalculateRequiredBufferSize(
         .ImageAllocationSize();
   }
 }
-
-}  // namespace
-
-namespace media {
 
 SharedMemoryBufferTracker::SharedMemoryBufferTracker() = default;
 

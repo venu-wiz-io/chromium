@@ -618,7 +618,10 @@ void VideoCaptureImpl::OnBufferReady(
             info->pixel_format, gfx::Size(info->coded_size),
             gfx::Rect(info->visible_rect), info->visible_rect.size(),
             const_cast<uint8_t*>(buffer_context->data()),
-            buffer_context->data_size(), info->timestamp);
+            // VIZIO: SharedMemoryBufferTracker reuses memory with >= size.
+            // Need accurate size. Hence commenting it cout
+            /* buffer_context->shared_memory_size(), */
+            info->frame_data_size, info->timestamp);
       }
       break;
     case VideoFrameBufferHandleType::READ_ONLY_SHMEM_REGION:

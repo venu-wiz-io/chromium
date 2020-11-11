@@ -36,6 +36,9 @@ class SharedMemoryBufferTracker final : public VideoCaptureBufferTracker {
   gfx::GpuMemoryBufferHandle GetGpuMemoryBufferHandle() override;
   uint32_t GetMemorySizeInBytes() override;
 
+  static size_t CalculateRequiredBufferSize(const gfx::Size& dimensions,
+                                  media::VideoPixelFormat format,
+                                  const media::mojom::PlaneStridesPtr& strides);
  private:
   base::UnsafeSharedMemoryRegion region_;
   base::WritableSharedMemoryMapping mapping_;
