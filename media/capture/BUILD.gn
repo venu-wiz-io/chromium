@@ -121,6 +121,17 @@ jumbo_component("capture_lib") {
     "video/video_frame_receiver_on_task_runner.h",
     "video_capturer_source.cc",
     "video_capturer_source.h",
+    "video/vizio_sdk_api_wrapper.cc",
+    "video/vizio_media_device_sdk_api_impl.cc",
+    "video/vizio_video_capture_device.cc",
+    "video/vizio_video_capture_device_factory.cc",
+    "video/vizio_video_capture_types.cc",
+    "video/vizio_video_capture_device_client.cc",
+    "video/vizio_uvc_capture_delegate.cc",
+    "video/vizio_uvc_capture_device_fd.cc",
+    "video/vizio_uvc_capture_device_impl.cc",
+    "video/vizio_camera_device_info.cc",
+    "video/vizio_sdk_logger.cc",
   ]
 
   public_deps = [
@@ -235,6 +246,9 @@ jumbo_component("capture_lib") {
       "video/linux/video_capture_device_factory_linux.h",
       "video/linux/video_capture_device_linux.cc",
       "video/linux/video_capture_device_linux.h",
+    ]
+    include_dirs = [
+      "//third_party/viziosdk",
     ]
   }
 

@@ -1731,7 +1731,7 @@ config("no_exceptions") {
 # TODO(thakis): Make this a blacklist instead, http://crbug.com/101600
 config("wexit_time_destructors") {
   if (is_clang) {
-    cflags = [ "-Wexit-time-destructors" ]
+#    cflags = [ "-Wexit-time-destructors" ]
   }
 }
 

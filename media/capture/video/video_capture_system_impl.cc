@@ -63,6 +63,8 @@ namespace media {
 VideoCaptureSystemImpl::VideoCaptureSystemImpl(
     std::unique_ptr<VideoCaptureDeviceFactory> factory)
     : factory_(std::move(factory)) {
+  if (media::VizioSDKAPIWrapper::bVizioSDK)
+      vizio_sdk_api_wrapper_ = std::make_shared<media::VizioSDKAPIWrapper>();
   thread_checker_.DetachFromThread();
 }
 
@@ -95,6 +97,11 @@ void VideoCaptureSystemImpl::ProcessDeviceInfoRequest() {
                      base::Unretained(this)));
 #else
   DeviceInfosReady(std::move(descriptors));
+
+  if (media::VizioSDKAPIWrapper::bVizioSDK) {
+      viziosdk::media::capture::CameraDeviceInfoVec deviceInfoVec = vizio_sdk_api_wrapper_->GetCameraDevices();
+      // TODO map camera info to conjure objects
+  }
 #endif
 }
 

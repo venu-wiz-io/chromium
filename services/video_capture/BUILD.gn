@@ -48,6 +48,9 @@ source_set("lib") {
     "virtual_device_enabled_device_factory.cc",
     "virtual_device_enabled_device_factory.h",
   ]
+    include_dirs = [
+      "//third_party/viziosdk",
+    ]
 
   configs += [ "//build/config/compiler:wexit_time_destructors" ]
 

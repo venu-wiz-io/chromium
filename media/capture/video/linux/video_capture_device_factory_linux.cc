@@ -20,6 +20,7 @@
 #include "build/build_config.h"
 #include "media/capture/video/linux/scoped_v4l2_device_fd.h"
 #include "media/capture/video/linux/video_capture_device_linux.h"
+#include "vizio_sdk_api_wrapper.h"
 
 #if defined(OS_OPENBSD)
 #include <sys/videoio.h>
@@ -144,7 +145,10 @@ VideoCaptureDeviceFactoryLinux::VideoCaptureDeviceFactoryLinux(
     scoped_refptr<base::SingleThreadTaskRunner> ui_task_runner)
     : v4l2_(base::MakeRefCounted<V4L2CaptureDeviceImpl>()),
       device_provider_(std::make_unique<DevVideoFilePathsDeviceProvider>()),
-      ui_task_runner_(ui_task_runner) {}
+      ui_task_runner_(ui_task_runner) 
+{
+//if (media::VizioSDKAPIWrapper::bVizioSDK) return;
+}
 
 VideoCaptureDeviceFactoryLinux::~VideoCaptureDeviceFactoryLinux() = default;
 
@@ -159,6 +163,7 @@ void VideoCaptureDeviceFactoryLinux::SetV4L2EnvironmentForTesting(
 std::unique_ptr<VideoCaptureDevice>
 VideoCaptureDeviceFactoryLinux::CreateDevice(
     const VideoCaptureDeviceDescriptor& device_descriptor) {
+//if (media::VizioSDKAPIWrapper::bVizioSDK) return nullptr;
   DCHECK(thread_checker_.CalledOnValidThread());
 #if defined(OS_CHROMEOS)
   ChromeOSDeviceCameraConfig camera_config(
@@ -189,6 +194,7 @@ VideoCaptureDeviceFactoryLinux::CreateDevice(
 
 void VideoCaptureDeviceFactoryLinux::GetDeviceDescriptors(
     VideoCaptureDeviceDescriptors* device_descriptors) {
+//if (media::VizioSDKAPIWrapper::bVizioSDK) return;
   DCHECK(thread_checker_.CalledOnValidThread());
   DCHECK(device_descriptors->empty());
   std::vector<std::string> filepaths;
@@ -237,6 +243,7 @@ void VideoCaptureDeviceFactoryLinux::GetDeviceDescriptors(
 void VideoCaptureDeviceFactoryLinux::GetSupportedFormats(
     const VideoCaptureDeviceDescriptor& device,
     VideoCaptureFormats* supported_formats) {
+//if (media::VizioSDKAPIWrapper::bVizioSDK) return;
   DCHECK(thread_checker_.CalledOnValidThread());
   if (device.device_id.empty())
     return;
@@ -308,6 +315,7 @@ std::vector<float> VideoCaptureDeviceFactoryLinux::GetFrameRateList(
 void VideoCaptureDeviceFactoryLinux::GetSupportedFormatsForV4L2BufferType(
     int fd,
     VideoCaptureFormats* supported_formats) {
+//if (media::VizioSDKAPIWrapper::bVizioSDK) return;
   v4l2_fmtdesc v4l2_format = {};
   v4l2_format.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
   for (; DoIoctl(fd, VIDIOC_ENUM_FMT, &v4l2_format) == 0; ++v4l2_format.index) {

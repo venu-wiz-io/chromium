@@ -1889,6 +1889,9 @@ jumbo_source_set("browser") {
       "//components/services/font/public/interfaces",
       "//services/service_manager/zygote",
     ]
+    include_dirs = [
+     "//third_party/viziosdk",
+    ]
   }
 
   # ChromeOS also defines linux but their memory-monitors conflict.
