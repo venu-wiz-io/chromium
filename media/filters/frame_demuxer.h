@@ -52,9 +52,7 @@ class MEDIA_EXPORT FrameDemuxerStream : public DemuxerStream {
   bool SupportsConfigChanges() override;
 //  void NotifyLastPtsSentToDecoder(const int64_t last_sent_pts) override;
 
-  bool UpdateAudioConfig();
-  bool UpdateVideoConfig();
-  void EnqueuePacket(scoped_refptr<media::VideoFrame> frame, bool first_frame);
+  bool EnqueuePacket(scoped_refptr<media::VideoFrame> frame, bool first_frame);
   void SatisfyPendingRead();
 
  private:
@@ -64,6 +62,9 @@ class MEDIA_EXPORT FrameDemuxerStream : public DemuxerStream {
     RETURNING_ABORT_FOR_READS,
     SHUTDOWN,
   };
+
+  bool UpdateAudioConfig();
+  bool UpdateVideoConfig(const VideoFrame& frame);
 
   // Specifies the type of the stream.
   const Type type_;
