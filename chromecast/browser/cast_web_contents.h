@@ -211,7 +211,7 @@ class CastWebContents {
     bool enabled_for_dev = false;
     // Chooses a media renderer for the WebContents.
     content::mojom::RendererType renderer_type =
-        content::mojom::RendererType::DEFAULT_RENDERER;
+        content::mojom::RendererType::MOJO_RENDERER;
     // Whether the WebContents is a root native window, or if it is embedded in
     // another WebContents (see Delegate::InnerContentsCreated()).
     bool is_root_window = false;
