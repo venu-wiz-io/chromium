@@ -80,12 +80,18 @@ void CmaAudioOutput::Initialize(
   DCHECK(multiroom_info);
   DCHECK(cma_backend_factory);
 
+  MediaPipelineDeviceParams::AudioStreamType stream_type =
+                           MediaPipelineDeviceParams::kAudioStreamSoundEffects;
+  if (audio_params_.effects() & ::media::AudioParameters::MULTIZONE) {
+    stream_type = MediaPipelineDeviceParams::kAudioStreamNormal;
+  }
   auto cma_backend_task_runner = std::make_unique<TaskRunnerImpl>();
   MediaPipelineDeviceParams device_params(
       MediaPipelineDeviceParams::kModeIgnorePts,
-      MediaPipelineDeviceParams::kAudioStreamNormal,
+      stream_type,
       cma_backend_task_runner.get(), GetContentType(device_id), device_id);
-  device_params.session_id = application_session_id;
+  //VINOD: session_id="error" causing a crash - no idea why?
+  device_params.session_id = ""; //application_session_id;
   device_params.multiroom = multiroom_info->multiroom;
   device_params.audio_channel = multiroom_info->audio_channel;
   device_params.output_delay_us = multiroom_info->output_delay.InMicroseconds();
@@ -93,7 +99,6 @@ void CmaAudioOutput::Initialize(
   if (!cma_backend) {
     return;
   }
-
   auto* audio_decoder = cma_backend->CreateAudioDecoder();
   if (!audio_decoder) {
     return;
@@ -114,11 +119,9 @@ void CmaAudioOutput::Initialize(
   if (!audio_decoder->SetConfig(audio_config) || !cma_backend->Initialize()) {
     return;
   }
-
   cma_backend_task_runner_ = std::move(cma_backend_task_runner);
   cma_backend_ = std::move(cma_backend);
   audio_decoder_ = audio_decoder;
-
   timestamp_helper_.SetBaseTimestamp(base::TimeDelta());
 }
 

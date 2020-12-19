@@ -7,6 +7,7 @@
 #include "base/check.h"
 #include "base/memory/ptr_util.h"
 #include "base/notreached.h"
+#include "base/logging.h"
 #include "chromecast/media/cma/backend/audio_decoder_wrapper.h"
 #include "chromecast/media/cma/backend/media_pipeline_backend_manager.h"
 #include "chromecast/media/cma/backend/video_decoder_wrapper.h"
@@ -290,6 +291,15 @@ MediaPipelineBackendWrapper::MediaPipelineBackendWrapper(
     : revoked_(false),
       backend_manager_(backend_manager),
       content_type_(params.content_type) {
+  LOG(INFO) << __func__
+            << " sync_type=" << params.sync_type
+            << " audio_type=" << params.audio_type
+            << " content_type=" << params.content_type
+            << " device_id=" << params.device_id
+            << " session_id=" << params.session_id
+            << " multiroom=" << params.multiroom
+            << " audio_channel=" << params.audio_channel;
+
   backend_ = std::make_unique<ActiveMediaPipelineBackendWrapper>(
       params, this, backend_manager, media_resource_tracker);
 }
