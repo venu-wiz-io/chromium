@@ -568,6 +568,7 @@ void ConvertVideoFrameToRGBPixelsTask(const VideoFrame* video_frame,
     case PIXEL_FORMAT_P016LE:
     case PIXEL_FORMAT_XR30:
     case PIXEL_FORMAT_XB30:
+    case PIXEL_FORMAT_H264:
     case PIXEL_FORMAT_UNKNOWN:
       NOTREACHED() << "Only YUV formats and Y16 are supported, got: "
                    << media::VideoPixelFormatToString(format);

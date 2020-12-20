@@ -146,6 +146,7 @@ gfx::Size VideoFrame::SampleSize(VideoPixelFormat format, size_t plane) {
         case PIXEL_FORMAT_XR30:
         case PIXEL_FORMAT_XB30:
         case PIXEL_FORMAT_BGRA:
+        case PIXEL_FORMAT_H264:
           break;
       }
   }
@@ -199,6 +200,7 @@ static bool RequiresEvenSizeAllocation(VideoPixelFormat format) {
     case PIXEL_FORMAT_I420A:
     case PIXEL_FORMAT_UYVY:
     case PIXEL_FORMAT_P016LE:
+    case PIXEL_FORMAT_H264:
       return true;
     case PIXEL_FORMAT_UNKNOWN:
       break;
@@ -233,6 +235,7 @@ static base::Optional<VideoFrameLayout> GetDefaultLayout(
       break;
 
     case PIXEL_FORMAT_ARGB:
+    case PIXEL_FORMAT_H264:
       planes = std::vector<ColorPlaneLayout>{ColorPlaneLayout(
           coded_size.width() * 4, 0, coded_size.GetArea() * 4)};
       break;
@@ -309,7 +312,7 @@ bool VideoFrame::IsValidConfig(VideoPixelFormat format,
     return true;
 
   // Make sure new formats are properly accounted for in the method.
-  static_assert(PIXEL_FORMAT_MAX == 32,
+  static_assert(PIXEL_FORMAT_MAX == 33,
                 "Added pixel format, please review IsValidConfig()");
 
   if (format == PIXEL_FORMAT_UNKNOWN) {
@@ -1014,6 +1017,7 @@ int VideoFrame::BytesPerElement(VideoPixelFormat format, size_t plane) {
     case PIXEL_FORMAT_I422:
     case PIXEL_FORMAT_I420A:
     case PIXEL_FORMAT_I444:
+    case PIXEL_FORMAT_H264:
       return 1;
     case PIXEL_FORMAT_MJPEG:
       return 0;

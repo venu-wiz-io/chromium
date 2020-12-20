@@ -161,6 +161,7 @@ gfx::ColorSpace GetDefaultColorSpace(VideoPixelFormat format) {
     case PIXEL_FORMAT_XR30:
     case PIXEL_FORMAT_XB30:
     case PIXEL_FORMAT_BGRA:
+    case PIXEL_FORMAT_H264:
       return gfx::ColorSpace::CreateSRGB();
     case PIXEL_FORMAT_UNKNOWN:
       return gfx::ColorSpace();

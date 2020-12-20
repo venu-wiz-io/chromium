@@ -34,6 +34,7 @@ bool IsFormatSupported(media::VideoPixelFormat pixel_format) {
           // NV12 and MJPEG are used by GpuMemoryBuffer on Chrome OS.
           pixel_format == media::PIXEL_FORMAT_NV12 ||
           pixel_format == media::PIXEL_FORMAT_MJPEG ||
+          pixel_format == media::PIXEL_FORMAT_H264 ||
           pixel_format == media::PIXEL_FORMAT_Y16);
 }
 
@@ -221,6 +222,9 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
   TRACE_EVENT0(TRACE_DISABLED_BY_DEFAULT("video_and_image_capture"),
                "VideoCaptureDeviceClient::OnIncomingCapturedData");
 
+  VideoPixelFormat pix_format = (format.pixel_format == PIXEL_FORMAT_H264)?
+                                       PIXEL_FORMAT_H264:PIXEL_FORMAT_I420;
+
   if (last_captured_pixel_format_ != format.pixel_format) {
     OnLog("Pixel format: " + VideoPixelFormatToString(format.pixel_format));
     last_captured_pixel_format_ = format.pixel_format;
@@ -264,7 +268,7 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
   const gfx::Size dimensions(destination_width, destination_height);
   Buffer buffer;
   auto reservation_result_code = ReserveOutputBuffer(
-      dimensions, PIXEL_FORMAT_I420, frame_feedback_id, &buffer);
+      dimensions, pix_format, frame_feedback_id, &buffer);
   if (reservation_result_code != ReserveResult::kSucceeded) {
     receiver_->OnFrameDropped(
         ConvertReservationFailureToFrameDropReason(reservation_result_code));
@@ -341,6 +345,9 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
     case PIXEL_FORMAT_MJPEG:
       fourcc_format = libyuv::FOURCC_MJPG;
       break;
+    case PIXEL_FORMAT_H264:
+      fourcc_format = libyuv::FOURCC_H264;
+      break;
     default:
       NOTREACHED();
   }
@@ -350,8 +357,8 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
 
   // The input |length| can be greater than the required buffer size because of
   // paddings and/or alignments, but it cannot be smaller.
-  DCHECK_GE(static_cast<size_t>(length), format.ImageAllocationSize());
-
+//  DCHECK_GE(static_cast<size_t>(length), format.ImageAllocationSize());
+///VINOD: Check what is happening here for MJPEG
 #if defined(OS_CHROMEOS)
   if (external_jpeg_decoder_) {
     const VideoCaptureJpegDecoder::STATUS status =
@@ -371,7 +378,9 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
 #endif  // defined(OS_CHROMEOS)
 
   // libyuv::ConvertToI420 use Rec601 to convert RGB to YUV.
-  if (libyuv::ConvertToI420(
+  if (format.pixel_format == PIXEL_FORMAT_H264) {
+    memcpy(y_plane_data, data, length);
+  } else if (libyuv::ConvertToI420(
           data, length, y_plane_data, yplane_stride, u_plane_data,
           uv_plane_stride, v_plane_data, uv_plane_stride, crop_x, crop_y,
           format.frame_size.width(),
@@ -385,7 +394,7 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
   }
 
   const VideoCaptureFormat output_format =
-      VideoCaptureFormat(dimensions, format.frame_rate, PIXEL_FORMAT_I420);
+      VideoCaptureFormat(dimensions, format.frame_rate, pix_format);
   OnIncomingCapturedBufferExt(std::move(buffer), output_format, color_space,
                               reference_time, timestamp, gfx::Rect(dimensions),
                               VideoFrameMetadata());

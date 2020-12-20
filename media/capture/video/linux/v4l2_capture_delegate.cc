@@ -58,6 +58,8 @@ constexpr int kMjpegHeight = 480;
 // Typical framerate, in fps
 constexpr int kTypicalFramerate = 30;
 
+//#define PREF_H264 1
+
 // V4L2 color formats supported by V4L2CaptureDelegate derived classes.
 // This list is ordered by precedence of use -- but see caveats for MJPEG.
 struct {
@@ -65,6 +67,9 @@ struct {
   VideoPixelFormat pixel_format;
   size_t num_planes;
 } constexpr kSupportedFormatsAndPlanarity[] = {
+#ifdef PREF_H264
+    {V4L2_PIX_FMT_H264, PIXEL_FORMAT_H264, 1},
+#endif
     {V4L2_PIX_FMT_YUV420, PIXEL_FORMAT_I420, 1},
     {V4L2_PIX_FMT_Y16, PIXEL_FORMAT_Y16, 1},
     {V4L2_PIX_FMT_Z16, PIXEL_FORMAT_Y16, 1},
@@ -102,6 +107,7 @@ void FillV4L2Format(v4l2_format* format,
   format->fmt.pix.width = width;
   format->fmt.pix.height = height;
   format->fmt.pix.pixelformat = pixelformat_fourcc;
+  format->fmt.pix.field       = V4L2_FIELD_INTERLACED;
 }
 
 // Fills all parts of |buffer|.
@@ -219,9 +225,11 @@ std::vector<uint32_t> V4L2CaptureDelegate::GetListOfUsableFourCcs(
   std::vector<uint32_t> supported_formats;
   supported_formats.reserve(base::size(kSupportedFormatsAndPlanarity));
 
+#ifndef PREF_H264
   // Duplicate MJPEG on top of the list depending on |prefer_mjpeg|.
   if (prefer_mjpeg)
     supported_formats.push_back(V4L2_PIX_FMT_MJPEG);
+#endif
 
   for (const auto& format : kSupportedFormatsAndPlanarity)
     supported_formats.push_back(format.fourcc);
@@ -918,7 +926,8 @@ void V4L2CaptureDelegate::DoCapture() {
       client_->OnFrameDropped(
           VideoCaptureFrameDropReason::kV4L2BufferErrorFlagWasSet);
 #endif
-    } else if (buffer.bytesused < capture_format_.ImageAllocationSize()) {
+    } else if (video_fmt_.fmt.pix.pixelformat != V4L2_PIX_FMT_H264
+                 && buffer.bytesused < capture_format_.ImageAllocationSize()) {
       LOG(ERROR) << "Dequeued v4l2 buffer contains invalid length ("
                  << buffer.bytesused << " bytes).";
       buffer.bytesused = 0;
@@ -931,6 +940,13 @@ void V4L2CaptureDelegate::DoCapture() {
       // matrix = v4l2_format->fmt.pix.ycbcr_enc;
       // transfer = v4l2_format->fmt.pix.xfer_func;
       // See http://crbug.com/959919.
+#if 0
+        FILE *fp=fopen("/tmp/conj_video.raw","ab");
+            fwrite(buffer_tracker->start(), buffer_tracker->payload_size(), 1, fp);
+            fflush(fp);
+            fclose(fp);
+#endif
+
       client_->OnIncomingCapturedData(
           buffer_tracker->start(), buffer_tracker->payload_size(),
           capture_format_, gfx::ColorSpace(), rotation_, false /* flip_y */,
