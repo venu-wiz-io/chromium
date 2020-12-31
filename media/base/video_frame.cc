@@ -444,6 +444,8 @@ scoped_refptr<VideoFrame> VideoFrame::WrapExternalDataWithLayout(
     frame->data_[i] = data + layout.planes()[i].offset;
   }
 
+  frame->data_size_ = data_size;
+
   return frame;
 }
 
