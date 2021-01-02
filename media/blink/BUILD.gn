@@ -99,6 +99,8 @@ component("blink") {
     sources += [
       "webmediaplayer_impl.cc",
       "webmediaplayer_impl.h",
+      "webmediaplayer_ms_cma.cc",
+      "webmediaplayer_ms_cma.h",
     ]
 
     deps += [ "//media/remoting:remoting_constants" ]

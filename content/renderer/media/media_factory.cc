@@ -40,6 +40,7 @@
 #include "media/blink/resource_fetch_context.h"
 #include "media/blink/webencryptedmediaclient_impl.h"
 #include "media/blink/webmediaplayer_impl.h"
+#include "media/blink/webmediaplayer_ms_cma.h"
 #include "media/media_buildflags.h"
 #include "media/mojo/buildflags.h"
 #include "media/renderers/decrypting_renderer_factory.h"
@@ -360,15 +361,17 @@ blink::WebMediaPlayer* MediaFactory::CreateMediaPlayer(
   blink::WebLocalFrame* web_frame = render_frame_->GetWebFrame();
   blink::WebSecurityOrigin security_origin =
       render_frame_->GetWebFrame()->GetSecurityOrigin();
+#if 0 // Webstream going to be played in the CMABackend
   if (source.IsMediaStream()) {
     return CreateWebMediaPlayerForMediaStream(
         client, inspector_context, sink_id, security_origin, web_frame,
         parent_frame_sink_id, settings);
   }
+#endif
 
   // If |source| was not a MediaStream, it must be a URL.
   // TODO(guidou): Fix this when support for other srcObject types is added.
-  DCHECK(source.IsURL());
+  DCHECK(source.IsMediaStream() || source.IsURL());
   blink::WebURL url = source.GetAsURL();
 
   RenderThreadImpl* render_thread = RenderThreadImpl::current();
@@ -509,8 +512,9 @@ blink::WebMediaPlayer* MediaFactory::CreateMediaPlayer(
       std::make_unique<media::VideoFrameCompositor>(
           params->video_frame_compositor_task_runner(), std::move(submitter));
 
-  media::WebMediaPlayerImpl* media_player = new media::WebMediaPlayerImpl(
+  media::WebMediaPlayerMsCma* media_player = new media::WebMediaPlayerMsCma(
       web_frame, client, encrypted_client, GetWebMediaPlayerDelegate(),
+      render_thread->GetIOTaskRunner(), sink_id,
       std::move(factory_selector), url_index_.get(), std::move(vfc),
       std::move(params));
 
