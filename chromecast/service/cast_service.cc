@@ -25,6 +25,11 @@ CastService::~CastService() {
   DCHECK(stopped_);
 }
 
+media::VideoPlaneController* CastService::video_plane_controller() const{
+  DCHECK(thread_checker_->CalledOnValidThread());
+  return nullptr;
+}
+
 void CastService::Initialize() {
   DCHECK(thread_checker_->CalledOnValidThread());
   InitializeInternal();

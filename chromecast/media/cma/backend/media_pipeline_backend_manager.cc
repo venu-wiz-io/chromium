@@ -36,7 +36,7 @@ namespace media {
 namespace {
 
 constexpr int kAudioDecoderLimit = std::numeric_limits<int>::max();
-constexpr int kVideoDecoderLimit = 1;
+constexpr int kVideoDecoderLimit = 10;
 constexpr base::TimeDelta kPowerSaveWaitTime = base::TimeDelta::FromSeconds(5);
 
 }  // namespace
@@ -96,12 +96,14 @@ void MediaPipelineBackendManager::BackendUseVideoDecoder(
     MediaPipelineBackendWrapper* backend_wrapper) {
   DCHECK(media_task_runner_->BelongsToCurrentThread());
   DCHECK(backend_wrapper);
+#if 0
   if (backend_wrapper_using_video_decoder_ &&
       backend_wrapper_using_video_decoder_ != backend_wrapper) {
     LOG(INFO) << __func__ << " revoke old backend : "
               << backend_wrapper_using_video_decoder_;
     backend_wrapper_using_video_decoder_->Revoke();
   }
+#endif
   backend_wrapper_using_video_decoder_ = backend_wrapper;
 }
 

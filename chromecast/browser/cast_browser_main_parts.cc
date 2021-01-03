@@ -321,6 +321,7 @@ const DefaultCommandLineSwitch kDefaultSwitches[] = {
     // This is needed for now to enable the x11 Ozone platform to work with
     // current Linux/NVidia OpenGL drivers.
     {switches::kIgnoreGpuBlocklist, ""},
+    {switches::kEnableHardwareOverlays, "cast"},
 #elif defined(ARCH_CPU_ARM_FAMILY)
 #if !BUILDFLAG(IS_CAST_AUDIO_ONLY)
     {switches::kEnableHardwareOverlays, "cast"},
@@ -577,9 +578,11 @@ void CastBrowserMainParts::PreMainMessageLoopRun() {
   viz::OverlayStrategyUnderlayCast::SetOverlayCompositedCallback(
       base::BindRepeating(&media::VideoPlaneController::SetGeometry,
                           base::Unretained(video_plane_controller_.get())));
-  media::CastRenderer::SetOverlayCompositedCallback(BindToCurrentThread(
-      base::BindRepeating(&media::VideoPlaneController::SetGeometry,
-                          base::Unretained(video_plane_controller_.get()))));
+//  media::CastRenderer::SetOverlayCompositedCallback(BindToCurrentThread(
+//      base::BindRepeating(&media::VideoPlaneController::SetGeometry,
+//                          base::Unretained(video_plane_controller_.get()))));
+  media::CastRenderer::SetMediaTaskRunner(
+                           cast_content_browser_client_->GetMediaTaskRunner());
 #endif
 
 #if defined(USE_AURA)

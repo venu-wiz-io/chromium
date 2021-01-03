@@ -34,6 +34,9 @@ namespace chromecast {
 class TaskRunnerImpl;
 
 namespace media {
+class VideoWindow;
+class VideoWindowController;
+class VideoPlaneController;
 class BalancedMediaTaskRunnerFactory;
 class CastCdmContext;
 class MediaPipelineImpl;
@@ -85,6 +88,8 @@ class CastRenderer : public ::media::Renderer,
   using OverlayCompositedCallback =
       base::RepeatingCallback<void(const gfx::RectF&, gfx::OverlayTransform)>;
   static void SetOverlayCompositedCallback(const OverlayCompositedCallback& cb);
+  static void SetMediaTaskRunner(
+                 scoped_refptr<base::SingleThreadTaskRunner> media_task_runner);
 
  private:
   enum Stream { STREAM_AUDIO, STREAM_VIDEO };
@@ -110,11 +115,13 @@ class CastRenderer : public ::media::Renderer,
   void CheckVideoResolutionPolicy();
   void RunInitCallback(::media::PipelineStatus status);
   void OnVideoInitializationFinished(::media::PipelineStatus status);
+  void CreateVideoWindowController(CmaBackend *backend);
 
   CmaBackendFactory* const backend_factory_;
   scoped_refptr<base::SingleThreadTaskRunner> task_runner_;
   VideoModeSwitcher* video_mode_switcher_;
   VideoResolutionPolicy* video_resolution_policy_;
+  std::unique_ptr<media::VideoWindowController> video_window_controller_;
   base::UnguessableToken overlay_plane_id_;
   mojo::Remote<chromecast::mojom::ServiceConnector> service_connector_;
   ::media::mojom::FrameInterfaceFactory* frame_interfaces_;
@@ -141,6 +148,12 @@ class CastRenderer : public ::media::Renderer,
     static base::NoDestructor<OverlayCompositedCallback>
         g_overlay_composited_callback;
     return *g_overlay_composited_callback;
+  }
+
+  static scoped_refptr<base::SingleThreadTaskRunner>&
+                                                  GetMainMediaTaskRunner() {
+    static scoped_refptr<base::SingleThreadTaskRunner> g_media_task_runner_;
+    return g_media_task_runner_;
   }
 
   base::Optional<float> pending_volume_;

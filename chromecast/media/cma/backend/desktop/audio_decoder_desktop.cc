@@ -5,6 +5,7 @@
 #include "chromecast/media/cma/backend/desktop/audio_decoder_desktop.h"
 
 #include "chromecast/media/cma/backend/desktop/media_sink_desktop.h"
+#include "base/logging.h"
 
 namespace chromecast {
 namespace media {
@@ -15,7 +16,8 @@ AudioDecoderDesktop::~AudioDecoderDesktop() {}
 
 void AudioDecoderDesktop::Start(base::TimeDelta start_pts) {
   DCHECK(!sink_);
-  sink_ = std::make_unique<MediaSinkDesktop>(delegate_, start_pts);
+  sink_ = std::make_unique<MediaSinkDesktop>(delegate_, start_pts, 1);
+  LOG(INFO) <<" Created audio SINK:"<<sink_.get();
 }
 
 void AudioDecoderDesktop::Stop() {
@@ -24,13 +26,16 @@ void AudioDecoderDesktop::Stop() {
 }
 
 void AudioDecoderDesktop::SetPlaybackRate(float rate) {
-  DCHECK(sink_);
-  sink_->SetPlaybackRate(rate);
+//  DCHECK(sink_);
+  if(sink_)
+    sink_->SetPlaybackRate(rate);
 }
 
 base::TimeDelta AudioDecoderDesktop::GetCurrentPts() {
-  DCHECK(sink_);
-  return sink_->GetCurrentPts();
+//  DCHECK(sink_);
+  if(sink_)
+    return sink_->GetCurrentPts();
+  return base::TimeDelta();
 }
 
 void AudioDecoderDesktop::SetDelegate(Delegate* delegate) {

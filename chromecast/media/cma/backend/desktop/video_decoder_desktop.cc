@@ -15,7 +15,7 @@ VideoDecoderDesktop::~VideoDecoderDesktop() {}
 
 void VideoDecoderDesktop::Start(base::TimeDelta start_pts) {
   DCHECK(!sink_);
-  sink_ = std::make_unique<MediaSinkDesktop>(delegate_, start_pts);
+  sink_ = std::make_unique<MediaSinkDesktop>(delegate_, start_pts, 0);
 }
 
 void VideoDecoderDesktop::Stop() {

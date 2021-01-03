@@ -7,6 +7,7 @@
 #include "base/check_op.h"
 #include "chromecast/media/cma/backend/desktop/audio_decoder_desktop.h"
 #include "chromecast/media/cma/backend/desktop/video_decoder_desktop.h"
+#include "chromecast/media/cma/backend/desktop/video_window_desktop.h"
 #include "media/base/timestamp_constants.h"
 
 namespace chromecast {
@@ -31,6 +32,14 @@ MediaPipelineBackendDesktop::CreateVideoDecoder() {
   DCHECK(!video_decoder_);
   video_decoder_ = std::make_unique<VideoDecoderDesktop>();
   return video_decoder_.get();
+}
+
+VideoWindow* MediaPipelineBackendDesktop::GetVideoWindow() {
+  DCHECK_LE(kStateInitialized, state_);
+  if(!video_window_)
+    video_window_ = std::make_unique<VideoWindowDesktop>();
+
+  return video_window_.get();
 }
 
 bool MediaPipelineBackendDesktop::Initialize() {

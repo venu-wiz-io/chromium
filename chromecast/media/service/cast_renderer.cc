@@ -16,6 +16,8 @@
 #include "chromecast/media/base/audio_device_ids.h"
 #include "chromecast/media/base/video_mode_switcher.h"
 #include "chromecast/media/base/video_resolution_policy.h"
+#include "chromecast/media/base/video_plane_controller.h"
+#include "chromecast/media/base/video_window_controller.h"
 #include "chromecast/media/cdm/cast_cdm_context.h"
 #include "chromecast/media/cma/base/balanced_media_task_runner_factory.h"
 #include "chromecast/media/cma/base/demuxer_stream_adapter.h"
@@ -32,6 +34,21 @@
 #include "media/base/media_resource.h"
 #include "media/base/renderer_client.h"
 #include "services/service_manager/public/mojom/interface_provider.mojom.h"
+
+#include "chromecast/browser/cast_browser_process.h"
+#include "chromecast/service/cast_service.h"
+#if defined(USE_AURA)
+#include "components/viz/service/display/overlay_strategy_underlay_cast.h"  // nogncheck
+// gn check ignored on OverlayManagerCast as it's not a public ozone
+// header, but is exported to allow injecting the overlay-composited
+// callback.
+#include "chromecast/browser/accessibility/accessibility_manager.h"
+#include "chromecast/browser/cast_display_configurator.h"
+#include "chromecast/graphics/cast_screen.h"
+#include "chromecast/graphics/cast_window_manager_aura.h"
+#include "components/viz/service/display/overlay_strategy_underlay_cast.h"  // nogncheck
+#include "ui/display/screen.h"
+#endif
 
 namespace chromecast {
 namespace media {
@@ -88,6 +105,16 @@ CastRenderer::CastRenderer(
 CastRenderer::~CastRenderer() {
   LOG(INFO) << __FUNCTION__ << ": " << this;
   DCHECK(task_runner_->BelongsToCurrentThread());
+
+  if(video_window_controller_) {
+    video_window_controller_->ClearVideoWindowGeometry();
+    media::VideoPlaneController* videoplane_controller =
+                      shell::CastBrowserProcess::GetInstance()->cast_service()
+                                                   ->video_plane_controller();
+    if(videoplane_controller){
+      videoplane_controller->RemoveVideoWindow(overlay_plane_id_);
+    }
+  }
 
   if (video_resolution_policy_)
     video_resolution_policy_->RemoveObserver(this);
@@ -209,6 +236,17 @@ void CastRenderer::OnGetMultiroomInfo(
       !application_media_info->mixer_audio_enabled;
 
   auto backend = backend_factory_->CreateBackend(params);
+#if defined(USE_AURA)
+  /* VINOD: TODO: VideoWindowController should be created in the
+     Browser Mainloop thread. Else, protect OverlayStrategyUnderlayCast &
+     VideoPlaneController with mutex locks.
+
+     VideoWindow will be created after VideoDecoder creation in the backend
+     Hence, passing the backend to the VideoWindow now.
+  */
+
+  CreateVideoWindowController(backend.get());
+#endif
 
   // Create pipeline.
   MediaPipelineClient pipeline_client;
@@ -310,6 +348,25 @@ void CastRenderer::OnGetMultiroomInfo(
   }
 }
 
+void CastRenderer::CreateVideoWindowController(CmaBackend *backend) {
+  // TODO(halliwell) move audio builds to use ozone_platform_cast, then can
+  // simplify this by removing IS_CAST_AUDIO_ONLY condition.  Should then also
+  // assert(ozone_platform_cast) in BUILD.gn where it depends on //ui/ozone.
+  gfx::Size display_size =
+      display::Screen::GetScreen()->GetPrimaryDisplay().GetSizeInPixel();
+
+  LOG(INFO) << " Creating VideoWindowController.";
+  video_window_controller_.reset(new media::VideoWindowController(
+      backend,
+      Size(display_size.width(), display_size.height()), GetMainMediaTaskRunner()));
+
+  media::VideoPlaneController* videoplane_controller =
+    shell::CastBrowserProcess::GetInstance()->cast_service()->video_plane_controller();
+  if(videoplane_controller){
+    videoplane_controller->AddVideoWindow(overlay_plane_id_, video_window_controller_.get());
+  }
+}
+
 void CastRenderer::RunInitCallback(::media::PipelineStatus status) {
   if (init_cb_)
     std::move(init_cb_).Run(status);
@@ -407,7 +464,10 @@ void CastRenderer::OnVideoResolutionPolicyChanged() {
 
 void CastRenderer::OnVideoGeometryChange(const gfx::RectF& rect_f,
                                          gfx::OverlayTransform transform) {
-  GetOverlayCompositedCallback().Run(rect_f, transform);
+//  GetOverlayCompositedCallback().Run(rect_f, transform);
+   if(video_window_controller_) {
+     video_window_controller_->SetGeometry(rect_f, transform);
+   }
 }
 
 void CastRenderer::OnError(::media::PipelineStatus status) {
@@ -463,6 +523,12 @@ void CastRenderer::OnVideoOpacityChange(bool opaque) {
 void CastRenderer::SetOverlayCompositedCallback(
     const OverlayCompositedCallback& cb) {
   GetOverlayCompositedCallback() = cb;
+}
+
+// static
+void CastRenderer::SetMediaTaskRunner(
+               scoped_refptr<base::SingleThreadTaskRunner> runner) {
+  GetMainMediaTaskRunner() = runner;
 }
 
 }  // namespace media

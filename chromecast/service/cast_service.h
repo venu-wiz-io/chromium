@@ -9,6 +9,7 @@
 
 #include "base/callback.h"
 #include "base/macros.h"
+#include "chromecast/media/base/video_plane_controller.h"
 
 class PrefService;
 
@@ -19,6 +20,14 @@ class ThreadChecker;
 namespace content {
 class BrowserContext;
 }
+
+namespace chromecast {
+namespace media
+{
+class VideoPlaneController;
+}
+}
+
 
 namespace chromecast {
 
@@ -33,6 +42,8 @@ class CastService {
   // Starts/stops the cast service.
   void Start();
   void Stop();
+
+  virtual media::VideoPlaneController* video_plane_controller() const;
 
   // Notify out-of-process (non-chrome renderers) of accessibility state.
   virtual void AccessibilityStateChanged(bool enabled);
