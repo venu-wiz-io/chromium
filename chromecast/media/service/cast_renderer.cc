@@ -108,12 +108,14 @@ CastRenderer::~CastRenderer() {
 
   if(video_window_controller_) {
     video_window_controller_->ClearVideoWindowGeometry();
+#if 0
     media::VideoPlaneController* videoplane_controller =
                       shell::CastBrowserProcess::GetInstance()->cast_service()
                                                    ->video_plane_controller();
     if(videoplane_controller){
       videoplane_controller->RemoveVideoWindow(overlay_plane_id_);
     }
+#endif
   }
 
   if (video_resolution_policy_)
@@ -360,11 +362,13 @@ void CastRenderer::CreateVideoWindowController(CmaBackend *backend) {
       backend,
       Size(display_size.width(), display_size.height()), GetMainMediaTaskRunner()));
 
+#if 0
   media::VideoPlaneController* videoplane_controller =
     shell::CastBrowserProcess::GetInstance()->cast_service()->video_plane_controller();
   if(videoplane_controller){
     videoplane_controller->AddVideoWindow(overlay_plane_id_, video_window_controller_.get());
   }
+#endif
 }
 
 void CastRenderer::RunInitCallback(::media::PipelineStatus status) {

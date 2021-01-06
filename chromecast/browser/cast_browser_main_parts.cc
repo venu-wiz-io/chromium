@@ -321,7 +321,7 @@ const DefaultCommandLineSwitch kDefaultSwitches[] = {
     // This is needed for now to enable the x11 Ozone platform to work with
     // current Linux/NVidia OpenGL drivers.
     {switches::kIgnoreGpuBlocklist, ""},
-    {switches::kEnableHardwareOverlays, "cast"},
+//    {switches::kEnableHardwareOverlays, "cast"},
 #elif defined(ARCH_CPU_ARM_FAMILY)
 #if !BUILDFLAG(IS_CAST_AUDIO_ONLY)
     {switches::kEnableHardwareOverlays, "cast"},
