@@ -144,6 +144,7 @@ void WebRtcVideoTrackSource::OnFrameCaptured(
   TRACE_EVENT0("media", "WebRtcVideoSource::OnFrameCaptured");
   if (!(frame->IsMappable() &&
         (frame->format() == media::PIXEL_FORMAT_I420 ||
+         frame->format() == media::PIXEL_FORMAT_H264 ||
          frame->format() == media::PIXEL_FORMAT_I420A)) &&
       !(frame->storage_type() ==
         media::VideoFrame::STORAGE_GPU_MEMORY_BUFFER) &&
