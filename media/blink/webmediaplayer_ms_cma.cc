@@ -606,6 +606,9 @@ WebMediaPlayerMsCma::~WebMediaPlayerMsCma() {
     set_cdm_result_.reset();
   }
 
+  if (!web_stream_.IsNull())
+    web_stream_.RemoveObserver(this);
+
   suppress_destruction_errors_ = true;
 
   delegate_->PlayerGone(delegate_id_);
@@ -638,6 +641,15 @@ WebMediaPlayerMsCma::~WebMediaPlayerMsCma() {
 
   if (!surface_layer_for_video_enabled_ && video_layer_)
     video_layer_->StopUsingProvider();
+
+  if (frame_deliverer_)
+    io_task_runner_->DeleteSoon(FROM_HERE, frame_deliverer_.release());
+
+  if (video_frame_provider_)
+    video_frame_provider_->Stop();
+
+  if (audio_renderer_)
+    audio_renderer_->Stop();
 
   simple_watch_timer_.Stop();
   media_log_->OnWebMediaPlayerDestroyed();
