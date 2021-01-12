@@ -31,6 +31,14 @@
 namespace blink {
 
 class WebMediaStreamTrack;
+class MediaStreamInternalFrameWrapper;
+class WebLocalFrame;
+
+enum class RendererReloadAction {
+  KEEP_RENDERER,
+  REMOVE_RENDERER,
+  NEW_RENDERER
+};
 
 class WebMediaStreamHelper {
  public:
@@ -45,6 +53,23 @@ class WebMediaStreamHelper {
 
   BLINK_PLATFORM_EXPORT static WebMediaStreamTrack
   GetVideoTrack(const WebMediaStream& stream, const WebString& track_id);
+
+  BLINK_PLATFORM_EXPORT static RendererReloadAction
+   GetRenderActionAndId(WebMediaStream &web_stream, WebString &track_id, 
+                                               bool audio_render_exist);
+};
+
+class MediaStreamToExternalFrameWrapper {
+
+ public:
+  MediaStreamToExternalFrameWrapper(WebLocalFrame* web_frame);
+  ~MediaStreamToExternalFrameWrapper();
+  WebLocalFrame* web_frame();
+
+ private:
+  std::unique_ptr<blink::MediaStreamInternalFrameWrapper> internal_frame_;
+
+  DISALLOW_COPY_AND_ASSIGN(MediaStreamToExternalFrameWrapper);
 };
 
 }  // namespace blink

@@ -55,6 +55,7 @@
 #include "third_party/blink/public/platform/web_content_decryption_module_result.h"
 #include "third_party/blink/public/platform/web_media_player.h"
 #include "third_party/blink/public/platform/web_surface_layer_bridge.h"
+#include "third_party/blink/public/platform/web_common.h"
 #include "third_party/blink/public/web/modules/media/webmediaplayer_util.h"
 #include "url/gurl.h"
 
@@ -66,6 +67,7 @@ class WebMediaPlayerClient;
 class WebMediaPlayerEncryptedMediaClient;
 class WebMediaStreamAudioRenderer;
 class WebMediaStreamVideoRenderer;
+class MediaStreamToExternalFrameWrapper;
 }  // namespace blink
 
 namespace base {
@@ -466,6 +468,9 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerMsCma
   // Called when a CDM has been attached to the |pipeline_|.
   void OnCdmAttached(bool success);
 
+  // Callback used to detect and propagate a render error.
+  void OnAudioRenderErrorCallback();
+
   // Inspects the current playback state and:
   //   - notifies |delegate_|,
   //   - toggles the memory usage reporting timer, and
@@ -680,6 +685,8 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerMsCma
   bool HasUnmutedAudio() const;
 
   blink::WebLocalFrame* const frame_;
+
+  std::unique_ptr<blink::MediaStreamToExternalFrameWrapper> internal_frame_;
 
   blink::WebMediaPlayer::NetworkState network_state_ =
       WebMediaPlayer::kNetworkStateEmpty;
@@ -1052,7 +1059,7 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerMsCma
   mojo::Remote<mojom::MediaMetricsProvider> media_metrics_provider_;
   mojo::Remote<mojom::PlaybackEventsRecorder> playback_events_recorder_;
 
-  const std::string initial_audio_output_device_id_;
+  const blink::WebString initial_audio_output_device_id_;
 
   base::Optional<ReadyState> stale_state_override_for_testing_;
 
@@ -1097,6 +1104,8 @@ class MEDIA_BLINK_EXPORT WebMediaPlayerMsCma
   // Created while playing, deleted otherwise.
   std::unique_ptr<SmoothnessHelper> smoothness_helper_;
   base::Optional<int> last_reported_fps_;
+
+  int routing_id_;
 
   base::WeakPtr<WebMediaPlayerMsCma> weak_this_;
   base::WeakPtrFactory<WebMediaPlayerMsCma> weak_factory_{this};

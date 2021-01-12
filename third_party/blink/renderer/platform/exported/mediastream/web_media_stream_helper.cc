@@ -26,12 +26,21 @@
 
 #include <memory>
 #include "third_party/blink/public/platform/web_string.h"
+#include "third_party/blink/public/web/web_local_frame.h"
 #include "third_party/blink/renderer/platform/mediastream/media_stream_component.h"
 #include "third_party/blink/renderer/platform/mediastream/media_stream_descriptor.h"
 #include "third_party/blink/renderer/platform/mediastream/media_stream_source.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
+#include "third_party/blink/renderer/core/frame/local_frame.h"
+#include "third_party/blink/renderer/modules/mediastream/media_stream_local_frame_wrapper.h"
 
 namespace blink {
+
+bool IsPlayableTrack(MediaStreamComponent* component) {
+  return component && component->Source() &&
+         component->Source()->GetReadyState() !=
+             MediaStreamSource::kReadyStateEnded;
+}
 
 WebVector<WebMediaStreamTrack> WebMediaStreamHelper::AudioTracks(
     const WebMediaStream& stream) {
@@ -81,6 +90,39 @@ WebMediaStreamTrack WebMediaStreamHelper::GetVideoTrack(
       return WebMediaStreamTrack(descriptor.VideoComponent(i));
   }
   return WebMediaStreamTrack();
+}
+
+RendererReloadAction WebMediaStreamHelper::GetRenderActionAndId(
+                             WebMediaStream &web_stream, WebString &track_id,
+                                                   bool audio_render_exist) {
+  RendererReloadAction renderer_action = RendererReloadAction::KEEP_RENDERER;
+  MediaStreamDescriptor& descriptor = *web_stream;
+  auto audio_components = descriptor.AudioComponents();
+
+  if (audio_components.IsEmpty()) {
+    if (audio_render_exist)
+      renderer_action = RendererReloadAction::REMOVE_RENDERER;
+    track_id = WebString();
+  } else if (WebString(audio_components[0]->Id()) != track_id &&
+             IsPlayableTrack(audio_components[0])) {
+    renderer_action = RendererReloadAction::NEW_RENDERER;
+    track_id = audio_components[0]->Id();
+  }
+
+  return renderer_action;
+}
+
+MediaStreamToExternalFrameWrapper::MediaStreamToExternalFrameWrapper(
+                                                          WebLocalFrame* frame)
+     : internal_frame_(std::make_unique<blink::MediaStreamInternalFrameWrapper>
+                                                                     (frame)) {
+}
+
+MediaStreamToExternalFrameWrapper::~MediaStreamToExternalFrameWrapper() {
+}
+
+WebLocalFrame* MediaStreamToExternalFrameWrapper::web_frame() {
+    return internal_frame_->web_frame();
 }
 
 }  // namespace blink
