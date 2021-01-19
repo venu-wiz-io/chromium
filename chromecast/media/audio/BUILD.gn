@@ -8,7 +8,7 @@ import("//testing/test.gni")
 
 declare_args() {
   # Defines bounds for the output buffer size (in frames)
-  minimum_output_buffer_size_in_frames = 512
+  minimum_output_buffer_size_in_frames = 2048
   maximum_output_buffer_size_in_frames = 8192
   default_output_buffer_size_in_frames = 2048
 }
