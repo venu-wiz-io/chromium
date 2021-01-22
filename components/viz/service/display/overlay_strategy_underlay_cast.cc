@@ -130,7 +130,6 @@ bool OverlayStrategyUnderlayCast::Attempt(
       render_pass->quad_list.ReplaceExistingQuadWithOpaqueTransparentSolidColor(
           it);
 
-      break;
     }
   }
 
