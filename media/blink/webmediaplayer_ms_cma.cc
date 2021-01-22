@@ -456,7 +456,8 @@ WebMediaPlayerMsCma::WebMediaPlayerMsCma(blink::WebLocalFrame* frame,
     std::unique_ptr<VideoFrameCompositor> compositor,
     std::unique_ptr<WebMediaPlayerParams> params)
     : frame_(frame),
-      internal_frame_(std::make_unique<blink::MediaStreamToExternalFrameWrapper>(frame)),
+      internal_frame_(
+        std::make_unique<blink::MediaStreamToExternalFrameWrapper>(frame)),
       main_task_runner_(
           frame->GetTaskRunner(blink::TaskType::kMediaElementEvent)),
       media_task_runner_(params->media_task_runner()),
@@ -502,7 +503,7 @@ WebMediaPlayerMsCma::WebMediaPlayerMsCma(blink::WebLocalFrame* frame,
       will_play_helper_(nullptr),
       demuxer_override_(params->TakeDemuxerOverride()),
       power_status_helper_(params->TakePowerStatusHelper()) {
-  DVLOG(1) << __func__;
+  LOG(INFO) << __func__;
   DCHECK(adjust_allocated_memory_cb_);
   DCHECK(renderer_factory_selector_);
   DCHECK(client_);
@@ -600,7 +601,7 @@ WebMediaPlayerMsCma::WebMediaPlayerMsCma(blink::WebLocalFrame* frame,
 }
 
 WebMediaPlayerMsCma::~WebMediaPlayerMsCma() {
-  DVLOG(1) << __func__;
+  LOG(INFO) << __func__;
   DCHECK(main_task_runner_->BelongsToCurrentThread());
 
   if (set_cdm_result_) {
@@ -950,10 +951,49 @@ void WebMediaPlayerMsCma::DoLoad(LoadType load_type,
       load_type == kLoadTypeURL ? blink::GetMediaURLScheme(loaded_url_)
                                 : mojom::MediaURLScheme::kUnknown);
 
-  if (demuxer_override_ || load_type == kLoadTypeMediaSource || is_web_stream) {
-    // If a demuxer override was specified or a Media Source or webmedia stream
+  if (demuxer_override_ || load_type == kLoadTypeMediaSource) {
+    // If a demuxer override was specified or a Media Source
     // pipeline will be used, the pipeline can start immediately.
     StartPipeline();
+  } else if(is_web_stream) {
+    // If it is a webmedia stream and video track available,
+    // pipeline will be used
+    auto vtracks = blink::WebMediaStreamHelper::VideoTracks(web_stream_);
+    auto atracks = blink::WebMediaStreamHelper::AudioTracks(web_stream_);
+    if(!vtracks.empty()) {
+      // Video track found. Start pipeline. video_frame_provider and
+      // audio_renderer will be created in OnDemuxerOpened
+      StartPipeline();
+    } else if(!atracks.empty()) {
+      //Start audio renderer immediately. No pipeline starting.
+      LOG(INFO) << "Audio-only playback.";
+      audio_renderer_ = renderer_factory_->GetAudioRenderer(
+                                     web_stream_, internal_frame_->web_frame(),
+                                               initial_audio_output_device_id_,
+          base::BindRepeating(&WebMediaPlayerMsCma::OnAudioRenderErrorCallback,
+                                                  weak_factory_.GetWeakPtr()));
+
+      if (audio_renderer_) {
+        audio_renderer_->Start();
+
+        // When associated with an <audio> element, we don't want to wait for the
+        // first video fram to become available as we do for <video> elements
+        // (<audio> elements can also be assigned video tracks).
+        // For more details, see crbug.com/738379
+        PipelineMetadata dummy_metadata;
+        dummy_metadata.has_audio = true;
+        dummy_metadata.audio_decoder_config = AudioDecoderConfig(kCodecPCM,
+          kSampleFormatS16, CHANNEL_LAYOUT_STEREO, 48000, {}, EncryptionScheme());
+        OnMetadata(dummy_metadata);
+        SetReadyState(WebMediaPlayer::kReadyStateHaveEnoughData);
+      } else {
+        LOG(ERROR) << "Failed to instantiate audio renderer.";
+        SetNetworkState(WebMediaPlayer::kNetworkStateNetworkError);
+      }
+    } else {
+      LOG(ERROR) << "No video or audio Track found.";
+      SetNetworkState(WebMediaPlayer::kNetworkStateNetworkError);
+    }
   } else {
     // If |loaded_url_| is remoting media, starting the pipeline.
     if (loaded_url_.SchemeIs(remoting::kRemotingScheme)) {
