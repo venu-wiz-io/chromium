@@ -974,18 +974,26 @@ void WebMediaPlayerMsCma::DoLoad(LoadType load_type,
                                                   weak_factory_.GetWeakPtr()));
 
       if (audio_renderer_) {
-        audio_renderer_->Start();
+        // Oleg: we are not interested in local audio playback
+        if (!audio_renderer_->IsLocalRenderer()) {
+          audio_renderer_->Start();
 
-        // When associated with an <audio> element, we don't want to wait for the
-        // first video fram to become available as we do for <video> elements
-        // (<audio> elements can also be assigned video tracks).
-        // For more details, see crbug.com/738379
-        PipelineMetadata dummy_metadata;
-        dummy_metadata.has_audio = true;
-        dummy_metadata.audio_decoder_config = AudioDecoderConfig(kCodecPCM,
-          kSampleFormatS16, CHANNEL_LAYOUT_STEREO, 48000, {}, EncryptionScheme());
-        OnMetadata(dummy_metadata);
-        SetReadyState(WebMediaPlayer::kReadyStateHaveEnoughData);
+          // When associated with an <audio> element, we don't want to wait for
+          // the first video fram to become available as we do for <video>
+          // elements (<audio> elements can also be assigned video tracks).
+          // For more details, see crbug.com/738379
+          PipelineMetadata dummy_metadata;
+          dummy_metadata.has_audio = true;
+          dummy_metadata.audio_decoder_config =
+              AudioDecoderConfig(kCodecPCM, kSampleFormatS16,
+                                 CHANNEL_LAYOUT_STEREO, 48000, {},
+                                 EncryptionScheme());
+          OnMetadata(dummy_metadata);
+          SetReadyState(WebMediaPlayer::kReadyStateHaveEnoughData);
+        }else {
+          LOG(ERROR) << "Skipping local audio source.";
+          SetNetworkState(WebMediaPlayer::kNetworkStateNetworkError);
+        }
       } else {
         LOG(ERROR) << "Failed to instantiate audio renderer.";
         SetNetworkState(WebMediaPlayer::kNetworkStateNetworkError);
