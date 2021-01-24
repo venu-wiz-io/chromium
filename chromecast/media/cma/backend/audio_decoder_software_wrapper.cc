@@ -48,9 +48,12 @@ AudioDecoderSoftwareWrapper::AudioDecoderSoftwareWrapper(
       decoder_error_(false) {
   DCHECK(backend_decoder_);
   backend_decoder_->SetDelegate(this);
+  LOG(INFO) << __func__ << ", " << this;
 }
 
-AudioDecoderSoftwareWrapper::~AudioDecoderSoftwareWrapper() {}
+AudioDecoderSoftwareWrapper::~AudioDecoderSoftwareWrapper() {
+  LOG(INFO) << __func__ << ", " << this;
+}
 
 void AudioDecoderSoftwareWrapper::SetDelegate(DecoderDelegate* delegate) {
   DCHECK(delegate);

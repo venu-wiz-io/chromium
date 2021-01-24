@@ -170,7 +170,7 @@ RendererWebAudioDeviceImpl::~RendererWebAudioDeviceImpl() {
 void RendererWebAudioDeviceImpl::Start() {
   DCHECK(thread_checker_.CalledOnValidThread());
 
-  if (sink_)
+  if (sink_ || !sink_)
     return;  // Already started.
 
   sink_ = WebAudioDeviceFactory::NewAudioRendererSink(
