@@ -83,8 +83,8 @@ bool AlsaPcmInputStream::Open() {
   if (device_handle_) {
     audio_buffer_.reset(new uint8_t[bytes_per_buffer_]);
 
-    // Open the microphone mixer.
-    mixer_handle_ = alsa_util::OpenMixer(wrapper_, device_name_);
+    // Oleg: shouldn't open the microphone mixer, it'll cause capture issues
+    //mixer_handle_ = alsa_util::OpenMixer(wrapper_, device_name_);
     if (mixer_handle_) {
       mixer_element_handle_ = alsa_util::LoadCaptureMixerElement(
           wrapper_, mixer_handle_);
