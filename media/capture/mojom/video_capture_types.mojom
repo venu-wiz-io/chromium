@@ -44,6 +44,9 @@ enum VideoCapturePixelFormat {
   XB30,
   BGRA,
   H264,
+  VP8,
+  VP9,
+  AV1,
 };
 
 enum ResolutionChangePolicy {

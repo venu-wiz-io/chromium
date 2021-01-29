@@ -35,7 +35,10 @@ size_t SharedMemoryBufferTracker::CalculateRequiredBufferSize(
     const gfx::Size& dimensions,
     media::VideoPixelFormat format,
     const media::mojom::PlaneStridesPtr& strides) {
-  if(format == media::PIXEL_FORMAT_H264) {
+  if(format == media::PIXEL_FORMAT_H264 ||
+     format == media::PIXEL_FORMAT_VP8 ||
+     format == media::PIXEL_FORMAT_VP9 ||
+     format == media::PIXEL_FORMAT_AV1) {
     //VINOD: It is a hack to save memory. Fix it.
     return dimensions.width();
   } else if (strides) {

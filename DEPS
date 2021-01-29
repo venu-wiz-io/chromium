@@ -377,6 +377,18 @@ vars = {
   'libcxx_revision':       'd9040c75cfea5928c804ab7c235fed06a63f743a',
   'libcxxabi_revision':    '196ba1aaa8ac285d94f4ea8d9836390a45360533',
   'libunwind_revision':    'd999d54f4bca789543a2eb6c995af2d9b5a1f3ed',
+  # Three lines of non-changing comments so that
+  # the commit queue can handle CLs rolling feed
+  # and whatever else without interference from each other.
+  'conjure_build_revision': 'bff62bc6b89490e71e4dc29e7f6c7c3ebf93f58f',
+  'chromecast_internal_revision': '421da5eeade3572b71d79b2d7126aa0e71633c9e',
+  'fairplay_revision': '54028ba6b1922631c311f0ce4a0c8fdee29b103d',
+  'playready_revision': '5f32158eb79f4e7c2ebe657da0aba9d112d0f7f2',
+  'widevine_revision': '905de9fcdffb8dc5236806aa56c9b6c279480755',
+  'sx7_sdk_revision': 'a30816b989258b11be713435d562ab1d9404e24a',
+  'build_revision': 'ad2327c00a3590a0540ab900d63131fc99f62200',
+  'apollo_extracts_revision': 'dc58a99b27920c4b6f018655df62f623b4e7395b',
+  'webrtc_revision': 'f9eae07775328456a1df4e89123ca154a0f6da2d',
 }
 
 # Only these hosts are allowed for dependencies in this DEPS file.

@@ -94,6 +94,31 @@ class WebRtcEncodedVideoFrame : public EncodedVideoFrame {
   gfx::Size resolution_;
 };
 
+media::VideoPixelFormat PixerFormatForBufferType(
+                                  webrtc::VideoFrameBuffer::Type buffer_type) {
+  switch (buffer_type) {
+  case webrtc::VideoFrameBuffer::Type::kI420:
+    return media::PIXEL_FORMAT_I420;
+  case webrtc::VideoFrameBuffer::Type::kI420A:
+    return media::PIXEL_FORMAT_I420A;
+  case webrtc::VideoFrameBuffer::Type::kI444:
+    return media::PIXEL_FORMAT_I444;
+  case webrtc::VideoFrameBuffer::Type::kNV12:
+    return media::PIXEL_FORMAT_NV12;
+  case webrtc::VideoFrameBuffer::Type::kVP8:
+    return media::PIXEL_FORMAT_VP8;
+  case webrtc::VideoFrameBuffer::Type::kVP9:
+    return media::PIXEL_FORMAT_VP9;
+  case webrtc::VideoFrameBuffer::Type::kAV1:
+    return media::PIXEL_FORMAT_AV1;
+  case webrtc::VideoFrameBuffer::Type::kH264:
+    return media::PIXEL_FORMAT_H264;
+  default:
+    return media::PIXEL_FORMAT_UNKNOWN;
+  }
+}
+
+
 }  // namespace
 
 // Internal class used for receiving frames from the webrtc track on a
@@ -267,14 +292,19 @@ void MediaStreamRemoteVideoSource::RemoteVideoSourceDelegate::OnFrame(
           const_cast<uint8_t*>(nv12_buffer->DataUV()), elapsed_timestamp);
       break;
     }
+    case webrtc::VideoFrameBuffer::Type::kVP8:
+    case webrtc::VideoFrameBuffer::Type::kVP9:
+    case webrtc::VideoFrameBuffer::Type::kAV1:
     case webrtc::VideoFrameBuffer::Type::kH264: {
-      const webrtc::H264BufferInterface* h264_buffer = buffer->GetH264();
+      const webrtc::EncodedBufferInterface* encoded_buffer =
+                                                    buffer->GetEncodedBuffer();
       // WebRTC defines H264 unencoded data
       // decoding will be done by the hardware decoder.
       video_frame = media::VideoFrame::WrapExternalData(
-          media::PIXEL_FORMAT_H264, size, gfx::Rect(size), size,
-          (unsigned char *)h264_buffer->Data(), h264_buffer->Data_len(),
-          elapsed_timestamp);
+          PixerFormatForBufferType(buffer->type()), size, gfx::Rect(size), size,
+          // TODO: const_cast is ugly, need to re-work this part
+          const_cast<uint8_t*>(encoded_buffer->Data()),
+          encoded_buffer->DataSize(), elapsed_timestamp);
       break;
     }
     default:

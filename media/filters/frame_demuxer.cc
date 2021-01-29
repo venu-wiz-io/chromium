@@ -34,6 +34,7 @@
 #include "media/base/video_util.h"
 
 #include "media/video/h264_parser.h"
+#include "media/parsers/vp8_parser.h"
 
 namespace {
 
@@ -86,6 +87,43 @@ namespace {
     return nalu.nal_unit_type == media::H264NALU::kIDRSlice;
   }
 
+
+bool IsVP8KeyFrame(const media::VideoFrame& frame) {
+  media::Vp8Parser parser;
+
+  media::Vp8FrameHeader frame_header;
+  if (parser.ParseFrame(frame.data(0), frame.data_size(), &frame_header)) {
+    return frame_header.IsKeyframe();
+  }
+  return false;
+}
+
+media::VideoCodec GetVideoCodec(const media::VideoFrame& frame) {
+  switch (frame.format()) {
+  case media::PIXEL_FORMAT_H264:
+    return media::kCodecH264;
+  case media::PIXEL_FORMAT_VP8:
+    return media::kCodecVP8;
+  case media::PIXEL_FORMAT_VP9:
+    return media::kCodecVP9;
+  case media::PIXEL_FORMAT_AV1:
+    return media::kCodecAV1;
+  default:
+    // TODO: do we need to support I420 here as well?
+    return media::kUnknownVideoCodec;
+  }
+}
+
+bool IsKeyFrame(const media::VideoFrame& frame) {
+  switch (frame.format()) {
+  case media::PIXEL_FORMAT_H264:
+    return HasIDRSlice(frame);
+  case media::PIXEL_FORMAT_VP8:
+    return IsVP8KeyFrame(frame);
+  default:
+    return false;
+  }
+}
 
 } // anonymous namespace
 
@@ -152,43 +190,50 @@ bool FrameDemuxerStream::UpdateAudioConfig() {
 }
 
 bool FrameDemuxerStream::UpdateVideoConfig(const VideoFrame& frame) {
-  LOG(INFO) << "FrameDemuxerStream::UpdateVideoConfigUsingFrame()";
+  base::AutoLock auto_lock(lock_);
 
-  VideoCodec codec = kCodecH264;
-  const VideoPixelFormat format = frame.format();
-  if (format != PIXEL_FORMAT_H264) {
-    LOG(ERROR) << "FrameDemuxer expects PIXEL_FORMAT_H264, but instead got: "
-               << VideoPixelFormatToString(format);
+  const VideoCodec codec = GetVideoCodec(frame);
+  if (codec == kUnknownVideoCodec) {
+    LOG(ERROR) << __func__ << " got unexpected pixel format: "
+               << VideoPixelFormatToString(frame.format());
     return false;
   }
 
-  H264Parser parser;
-  parser.SetStream(frame.data(0), static_cast<off_t>(frame.data_size()));
+  VideoCodecProfile profile = VIDEO_CODEC_PROFILE_UNKNOWN;
 
-  const H264SPS* sps = FindSPS(parser);
-  if (!sps) {
-    LOG(ERROR) << "FrameDemuxer couldn't find SPS";
-    return false;
+  VideoColorSpace color_space {
+    VideoColorSpace::PrimaryID::BT709,
+    VideoColorSpace::TransferID::BT709,
+    VideoColorSpace::MatrixID::BT709,
+    frame.ColorSpace().GetRangeID()
+  };
+
+  if (codec == kCodecH264) {
+    H264Parser parser;
+    parser.SetStream(frame.data(0), static_cast<off_t>(frame.data_size()));
+
+    const H264SPS* sps = FindSPS(parser);
+    if (!sps) {
+      LOG(ERROR) << "FrameDemuxer couldn't find SPS";
+      return false;
+    }
+
+    profile = H264Parser::ProfileIDCToVideoCodecProfile(sps->profile_idc);
+    color_space = sps->GetColorSpace();
+  } else if (codec == kCodecVP8) {
+    profile = VP8PROFILE_ANY;
   }
 
-  VideoCodecProfile profile =
-                   H264Parser::ProfileIDCToVideoCodecProfile(sps->profile_idc);
-
-  VideoColorSpace color_space = sps->GetColorSpace();
   VideoDecoderConfig::AlphaMode alpha_mode =
                                       VideoDecoderConfig::AlphaMode::kIsOpaque;
   VideoTransformation transformation = VIDEO_ROTATION_0;
 
-  base::AutoLock auto_lock(lock_);
-  LOG(ERROR) << "FrameDemuxerStream::UpdateVideoConfig()";
-
-  std::vector<uint8_t> extra_data;
-  EncryptionScheme en_scheme = EncryptionScheme::kUnencrypted;
-    
-  video_config_.reset(new VideoDecoderConfig());
   video_config_->Initialize(codec, profile, alpha_mode, color_space,
-                      transformation, frame.coded_size(), frame.visible_rect(),
-                                  frame.natural_size(), extra_data, en_scheme);
+                            transformation, frame.coded_size(),
+                            frame.visible_rect(), frame.natural_size(), {},
+                            EncryptionScheme::kUnencrypted);
+
+  LOG(INFO) << __func__ << ": " << video_config_->AsHumanReadableString();
   return true;
 }
 
@@ -207,7 +252,7 @@ bool FrameDemuxerStream::EnqueuePacket(scoped_refptr<media::VideoFrame> frame,
   buffer = DecoderBuffer::CopyFrom(frame->data(0), frame->data_size());
   buffer->set_timestamp(frame->timestamp());
   buffer->set_duration(base::TimeDelta::FromMilliseconds(33)); // VINOD: It is 30fps. Fix it
-  buffer->set_is_key_frame(HasIDRSlice(*frame.get()));
+  buffer->set_is_key_frame(IsKeyFrame(*frame.get()));
 
   {
 	  base::AutoLock auto_lock(lock_);

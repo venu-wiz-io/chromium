@@ -36,8 +36,7 @@ class PLATFORM_EXPORT WebRtcVideoFrameAdapter
   rtc::scoped_refptr<webrtc::I420BufferInterface> ToI420() override;
   const webrtc::I420BufferInterface* GetI420() const override;
 
-  rtc::scoped_refptr<webrtc::H264BufferInterface> ToH264() override;
-//  const webrtc::H264BufferInterface* GetH264() const override;
+  rtc::scoped_refptr<webrtc::EncodedBufferInterface> ToEncodedBuffer() override;
 
  protected:
   ~WebRtcVideoFrameAdapter() override;

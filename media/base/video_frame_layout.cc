@@ -56,6 +56,9 @@ size_t VideoFrameLayout::NumPlanes(VideoPixelFormat format) {
     case PIXEL_FORMAT_XR30:
     case PIXEL_FORMAT_XB30:
     case PIXEL_FORMAT_H264:
+    case PIXEL_FORMAT_VP8:
+    case PIXEL_FORMAT_VP9:
+    case PIXEL_FORMAT_AV1:
       return 1;
     case PIXEL_FORMAT_NV12:
     case PIXEL_FORMAT_NV21:

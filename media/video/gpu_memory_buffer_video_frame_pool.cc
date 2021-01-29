@@ -618,6 +618,9 @@ void GpuMemoryBufferVideoFramePool::PoolImpl::CreateHardwareFrame(
     case PIXEL_FORMAT_XR30:
     case PIXEL_FORMAT_XB30:
     case PIXEL_FORMAT_H264:
+    case PIXEL_FORMAT_VP8:
+    case PIXEL_FORMAT_VP9:
+    case PIXEL_FORMAT_AV1:
     case PIXEL_FORMAT_UNKNOWN:
       if (is_software_backed_video_frame) {
         UMA_HISTOGRAM_ENUMERATION(

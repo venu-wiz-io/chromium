@@ -149,6 +149,12 @@ EnumTraits<media::mojom::VideoCapturePixelFormat,
       return media::mojom::VideoCapturePixelFormat::XB30;
     case media::VideoPixelFormat::PIXEL_FORMAT_H264:
       return media::mojom::VideoCapturePixelFormat::H264;
+    case media::VideoPixelFormat::PIXEL_FORMAT_VP8:
+      return media::mojom::VideoCapturePixelFormat::VP8;
+    case media::VideoPixelFormat::PIXEL_FORMAT_VP9:
+      return media::mojom::VideoCapturePixelFormat::VP9;
+    case media::VideoPixelFormat::PIXEL_FORMAT_AV1:
+      return media::mojom::VideoCapturePixelFormat::AV1;
   }
   NOTREACHED();
   return media::mojom::VideoCapturePixelFormat::I420;
@@ -252,6 +258,15 @@ bool EnumTraits<media::mojom::VideoCapturePixelFormat,
       return true;
     case media::mojom::VideoCapturePixelFormat::H264:
       *output = media::PIXEL_FORMAT_H264;
+      return true;
+    case media::mojom::VideoCapturePixelFormat::VP8:
+      *output = media::PIXEL_FORMAT_VP8;
+      return true;
+    case media::mojom::VideoCapturePixelFormat::VP9:
+      *output = media::PIXEL_FORMAT_VP9;
+      return true;
+    case media::mojom::VideoCapturePixelFormat::AV1:
+      *output = media::PIXEL_FORMAT_AV1;
       return true;
   }
   NOTREACHED();

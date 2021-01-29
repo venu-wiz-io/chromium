@@ -78,10 +78,13 @@ enum VideoPixelFormat {
   PIXEL_FORMAT_BGRA = 32,  // 32bpp ARGB (byte-order), 1 plane.
 
   PIXEL_FORMAT_H264 = 33,  // H264 compressed
+  PIXEL_FORMAT_VP8  = 34,  // VP8 compressed
+  PIXEL_FORMAT_VP9  = 35,  // VP9 compressed
+  PIXEL_FORMAT_AV1  = 36,  // AV1 compressed
 
   // Please update UMA histogram enumeration when adding new formats here.
   PIXEL_FORMAT_MAX =
-      PIXEL_FORMAT_H264,  // Must always be equal to largest entry logged.
+      PIXEL_FORMAT_AV1,  // Must always be equal to largest entry logged.
 };
 
 // Returns the name of a Format as a string.

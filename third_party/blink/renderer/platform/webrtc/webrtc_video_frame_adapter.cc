@@ -84,7 +84,7 @@ class CodedFrameAdapter : public Base {
     return frame_->data(0);
   }
 
-  int Data_len() const override {
+  size_t DataSize() const override {
     return frame_->data_size();
   }
 
@@ -98,8 +98,14 @@ void IsValidFrame(const media::VideoFrame& frame) {
       frame.visible_rect(), frame.natural_size()));
   DCHECK(media::PIXEL_FORMAT_I420 == frame.format() ||
          media::PIXEL_FORMAT_H264 == frame.format() ||
+         media::PIXEL_FORMAT_VP8 == frame.format() ||
+         media::PIXEL_FORMAT_VP9 == frame.format() ||
+         media::PIXEL_FORMAT_AV1 == frame.format() ||
          media::PIXEL_FORMAT_I420A == frame.format());
-  if(media::PIXEL_FORMAT_H264 != frame.format()) {
+  if(media::PIXEL_FORMAT_H264 != frame.format() &&
+     media::PIXEL_FORMAT_VP8 != frame.format() &&
+     media::PIXEL_FORMAT_VP9 != frame.format() &&
+     media::PIXEL_FORMAT_AV1 != frame.format()) {
     CHECK(reinterpret_cast<const void*>(frame.data(media::VideoFrame::kYPlane)));
     CHECK(reinterpret_cast<const void*>(frame.data(media::VideoFrame::kUPlane)));
     CHECK(reinterpret_cast<const void*>(frame.data(media::VideoFrame::kVPlane)));
@@ -182,11 +188,13 @@ WebRtcVideoFrameAdapter::WebRtcVideoFrameAdapter(
 WebRtcVideoFrameAdapter::~WebRtcVideoFrameAdapter() {}
 
 webrtc::VideoFrameBuffer::Type WebRtcVideoFrameAdapter::type() const {
-  if(media::PIXEL_FORMAT_H264 == frame_->format())
-  {
-    return Type::kH264;
+  switch (frame_->format()) {
+  case media::PIXEL_FORMAT_H264: return Type::kH264;
+  case media::PIXEL_FORMAT_VP8:  return Type::kVP8;
+  case media::PIXEL_FORMAT_VP9:  return Type::kVP9;
+  case media::PIXEL_FORMAT_AV1:  return Type::kAV1;
+  default: return Type::kNative;
   }
-  return Type::kNative;
 }
 
 int WebRtcVideoFrameAdapter::width() const {
@@ -288,10 +296,10 @@ const webrtc::I420BufferInterface* WebRtcVideoFrameAdapter::GetI420() const {
   return frame_adapter_.get();
 }
 
-rtc::scoped_refptr<webrtc::H264BufferInterface>
-WebRtcVideoFrameAdapter::ToH264() {
-  return new rtc::RefCountedObject<CodedFrameAdapter<webrtc::H264BufferInterface>>(
-      frame_);
+rtc::scoped_refptr<webrtc::EncodedBufferInterface>
+WebRtcVideoFrameAdapter::ToEncodedBuffer() {
+  return new rtc::RefCountedObject<
+      CodedFrameAdapter<webrtc::EncodedBufferInterface>>(frame_);
 }
 
 #if 0

@@ -151,6 +151,9 @@ VideoFrameResourceType ExternalResourceTypeForHardwarePlanes(
     case PIXEL_FORMAT_Y16:
     case PIXEL_FORMAT_XBGR:
     case PIXEL_FORMAT_H264:
+    case PIXEL_FORMAT_VP8:
+    case PIXEL_FORMAT_VP9:
+    case PIXEL_FORMAT_AV1:
     case PIXEL_FORMAT_UNKNOWN:
       break;
   }
