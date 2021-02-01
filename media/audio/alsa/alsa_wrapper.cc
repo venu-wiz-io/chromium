@@ -212,6 +212,10 @@ void AlsaWrapper::PcmSwParamsFree(snd_pcm_sw_params_t* sw_params) {
   return snd_pcm_sw_params_free(sw_params);
 }
 
+snd_pcm_sframes_t AlsaWrapper::PcmAvail(snd_pcm_t* handle) {
+  return snd_pcm_avail(handle);
+}
+
 snd_pcm_sframes_t AlsaWrapper::PcmAvailUpdate(snd_pcm_t* handle) {
   return snd_pcm_avail_update(handle);
 }

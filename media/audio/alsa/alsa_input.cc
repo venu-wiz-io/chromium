@@ -171,9 +171,9 @@ void AlsaPcmInputStream::ReadAudio() {
   if (!running_)
     return;
 
-  snd_pcm_sframes_t frames = wrapper_->PcmAvailUpdate(device_handle_);
+  snd_pcm_sframes_t frames = wrapper_->PcmAvail(device_handle_);
   if (frames < 0) {  // Potentially recoverable error?
-    LOG(WARNING) << "PcmAvailUpdate(): " << wrapper_->StrError(frames);
+    LOG(WARNING) << "PcmAvail(): " << wrapper_->StrError(frames);
     Recover(frames);
   }
 
@@ -213,9 +213,9 @@ void AlsaPcmInputStream::ReadAudio() {
       // TODO(dalecurtis): This should probably use snd_pcm_htimestamp() so that
       // we can have |capture_time| directly instead of computing it as
       // Now() - available frames.
-      snd_pcm_sframes_t avail_frames = wrapper_->PcmAvailUpdate(device_handle_);
+      snd_pcm_sframes_t avail_frames = wrapper_->PcmAvail(device_handle_);
       if (avail_frames < 0) {
-        LOG(WARNING) << "PcmAvailUpdate(): "
+        LOG(WARNING) << "PcmAvail(): "
                      << wrapper_->StrError(avail_frames);
         avail_frames = 0;  // Error getting number of avail frames, set it to 0
       }

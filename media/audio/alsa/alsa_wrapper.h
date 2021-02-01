@@ -95,6 +95,7 @@ class MEDIA_EXPORT AlsaWrapper {
   virtual int PcmSwParams(snd_pcm_t* handle, snd_pcm_sw_params_t* sw_params);
   virtual void PcmSwParamsFree(snd_pcm_sw_params_t* sw_params);
   virtual const char* PcmName(snd_pcm_t* handle);
+  virtual snd_pcm_sframes_t PcmAvail(snd_pcm_t* handle);
   virtual snd_pcm_sframes_t PcmAvailUpdate(snd_pcm_t* handle);
   virtual snd_pcm_state_t PcmState(snd_pcm_t* handle);
   virtual int PcmStart(snd_pcm_t* handle);
