@@ -55,7 +55,7 @@ class WebMediaStreamHelper {
   GetVideoTrack(const WebMediaStream& stream, const WebString& track_id);
 
   BLINK_PLATFORM_EXPORT static RendererReloadAction
-   GetRenderActionAndId(WebMediaStream &web_stream, WebString &track_id, 
+  GetRenderActionAndId(const WebMediaStream &web_stream, WebString &track_id,
                                                bool audio_render_exist);
 };
 

@@ -93,8 +93,8 @@ WebMediaStreamTrack WebMediaStreamHelper::GetVideoTrack(
 }
 
 RendererReloadAction WebMediaStreamHelper::GetRenderActionAndId(
-                             WebMediaStream &web_stream, WebString &track_id,
-                                                   bool audio_render_exist) {
+    const WebMediaStream& web_stream, WebString &track_id,
+    bool audio_render_exist) {
   RendererReloadAction renderer_action = RendererReloadAction::KEEP_RENDERER;
   MediaStreamDescriptor& descriptor = *web_stream;
   auto audio_components = descriptor.AudioComponents();
