@@ -27,6 +27,7 @@
 #include <memory>
 #include "third_party/blink/public/platform/web_string.h"
 #include "third_party/blink/public/web/web_local_frame.h"
+#include "third_party/blink/renderer/platform/mediastream/media_stream_audio_track.h"
 #include "third_party/blink/renderer/platform/mediastream/media_stream_component.h"
 #include "third_party/blink/renderer/platform/mediastream/media_stream_descriptor.h"
 #include "third_party/blink/renderer/platform/mediastream/media_stream_source.h"
@@ -110,6 +111,24 @@ RendererReloadAction WebMediaStreamHelper::GetRenderActionAndId(
   }
 
   return renderer_action;
+}
+
+bool WebMediaStreamHelper::IsLocal(const WebMediaStream& web_stream)
+{
+  MediaStreamDescriptor& descriptor = *web_stream;
+  size_t number_of_video_tracks = descriptor.NumberOfVideoComponents();
+  if (number_of_video_tracks > 0) {
+    MediaStreamTrackPlatform* track =
+        descriptor.VideoComponent(0)->GetPlatformTrack();
+    return track && track->is_local_track();
+  } else {
+    size_t number_of_audio_tracks = descriptor.NumberOfVideoComponents();
+    if (number_of_audio_tracks > 0) {
+      MediaStreamComponent* track = descriptor.AudioComponent(0);
+      return MediaStreamAudioTrack::From(track)->is_local_track();
+    }
+  }
+  return false;
 }
 
 MediaStreamToExternalFrameWrapper::MediaStreamToExternalFrameWrapper(

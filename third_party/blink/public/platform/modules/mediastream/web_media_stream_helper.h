@@ -57,6 +57,8 @@ class WebMediaStreamHelper {
   BLINK_PLATFORM_EXPORT static RendererReloadAction
   GetRenderActionAndId(const WebMediaStream &web_stream, WebString &track_id,
                                                bool audio_render_exist);
+
+  BLINK_PLATFORM_EXPORT static bool IsLocal(const WebMediaStream &web_stream);
 };
 
 class MediaStreamToExternalFrameWrapper {
