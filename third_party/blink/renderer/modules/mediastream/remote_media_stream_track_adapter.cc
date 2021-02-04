@@ -58,7 +58,7 @@ void RemoteVideoTrackAdapter::InitializeWebVideoTrack(
 
   track()->SetPlatformTrack(std::make_unique<MediaStreamVideoTrack>(
       video_source, MediaStreamVideoSource::ConstraintsOnceCallback(),
-      enabled));
+      enabled, false));
 }
 
 RemoteAudioTrackAdapter::RemoteAudioTrackAdapter(

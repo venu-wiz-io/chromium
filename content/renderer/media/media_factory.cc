@@ -53,6 +53,7 @@
 #include "services/viz/public/cpp/gpu/context_provider_command_buffer.h"
 #include "third_party/blink/public/common/browser_interface_broker_proxy.h"
 #include "third_party/blink/public/common/thread_safe_browser_interface_broker_proxy.h"
+#include "third_party/blink/public/platform/modules/mediastream/web_media_stream_helper.h"
 #include "third_party/blink/public/platform/platform.h"
 #include "third_party/blink/public/platform/web_surface_layer_bridge.h"
 #include "third_party/blink/public/platform/web_video_frame_submitter.h"
@@ -217,6 +218,11 @@ std::unique_ptr<media::DefaultRendererFactory> CreateDefaultRendererFactory(
   return default_factory;
 }
 
+bool SourceIsLocalMediaStream(const blink::WebMediaPlayerSource& source) {
+  return source.IsMediaStream() &&
+         blink::WebMediaStreamHelper::IsLocal(source.GetAsMediaStream());
+}
+
 }  // namespace
 
 namespace content {
@@ -361,13 +367,14 @@ blink::WebMediaPlayer* MediaFactory::CreateMediaPlayer(
   blink::WebLocalFrame* web_frame = render_frame_->GetWebFrame();
   blink::WebSecurityOrigin security_origin =
       render_frame_->GetWebFrame()->GetSecurityOrigin();
-#if 0 // Webstream going to be played in the CMABackend
-  if (source.IsMediaStream()) {
+  if (SourceIsLocalMediaStream(source)) {
+    LOG(INFO) << __func__ << " : local stream : " << sink_id.Utf8();
     return CreateWebMediaPlayerForMediaStream(
         client, inspector_context, sink_id, security_origin, web_frame,
         parent_frame_sink_id, settings);
+  } else {
+    LOG(INFO) << __func__ << " : remote stream : " << sink_id.Utf8();
   }
-#endif
 
   // If |source| was not a MediaStream, it must be a URL.
   // TODO(guidou): Fix this when support for other srcObject types is added.

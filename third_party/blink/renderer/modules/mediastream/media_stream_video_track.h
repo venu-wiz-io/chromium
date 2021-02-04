@@ -41,7 +41,8 @@ class MODULES_EXPORT MediaStreamVideoTrack : public MediaStreamTrackPlatform {
   static WebMediaStreamTrack CreateVideoTrack(
       MediaStreamVideoSource* source,
       MediaStreamVideoSource::ConstraintsOnceCallback callback,
-      bool enabled);
+      bool enabled,
+      bool is_local = true);
   static WebMediaStreamTrack CreateVideoTrack(
       MediaStreamVideoSource* source,
       const VideoTrackAdapterSettings& adapter_settings,
@@ -53,7 +54,8 @@ class MODULES_EXPORT MediaStreamVideoTrack : public MediaStreamTrackPlatform {
       const base::Optional<double>& zoom,
       bool pan_tilt_zoom_allowed,
       MediaStreamVideoSource::ConstraintsOnceCallback callback,
-      bool enabled);
+      bool enabled,
+      bool is_local = true);
 
   static MediaStreamVideoTrack* GetVideoTrack(const WebMediaStreamTrack& track);
 
@@ -61,7 +63,8 @@ class MODULES_EXPORT MediaStreamVideoTrack : public MediaStreamTrackPlatform {
   MediaStreamVideoTrack(
       MediaStreamVideoSource* source,
       MediaStreamVideoSource::ConstraintsOnceCallback callback,
-      bool enabled);
+      bool enabled,
+      bool is_local = true);
   MediaStreamVideoTrack(
       MediaStreamVideoSource* source,
       const VideoTrackAdapterSettings& adapter_settings,
@@ -73,7 +76,8 @@ class MODULES_EXPORT MediaStreamVideoTrack : public MediaStreamTrackPlatform {
       const base::Optional<double>& zoom,
       bool pan_tilt_zoom_allowed,
       MediaStreamVideoSource::ConstraintsOnceCallback callback,
-      bool enabled);
+      bool enabled,
+      bool is_local = true);
   ~MediaStreamVideoTrack() override;
 
   // MediaStreamTrack overrides.

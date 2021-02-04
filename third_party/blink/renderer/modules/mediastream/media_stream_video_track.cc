@@ -337,10 +337,11 @@ MediaStreamVideoTrack::FrameDeliverer::GetBlackFrame(
 WebMediaStreamTrack MediaStreamVideoTrack::CreateVideoTrack(
     MediaStreamVideoSource* source,
     MediaStreamVideoSource::ConstraintsOnceCallback callback,
-    bool enabled) {
+    bool enabled,
+    bool is_local) {
   auto* component = MakeGarbageCollected<MediaStreamComponent>(source->Owner());
   component->SetPlatformTrack(std::make_unique<MediaStreamVideoTrack>(
-      source, std::move(callback), enabled));
+      source, std::move(callback), enabled, is_local));
   return WebMediaStreamTrack(component);
 }
 
@@ -356,12 +357,14 @@ WebMediaStreamTrack MediaStreamVideoTrack::CreateVideoTrack(
     const base::Optional<double>& zoom,
     bool pan_tilt_zoom_allowed,
     MediaStreamVideoSource::ConstraintsOnceCallback callback,
-    bool enabled) {
+    bool enabled,
+    bool is_local) {
   WebMediaStreamTrack track;
   auto* component = MakeGarbageCollected<MediaStreamComponent>(source->Owner());
   component->SetPlatformTrack(std::make_unique<MediaStreamVideoTrack>(
       source, adapter_settings, noise_reduction, is_screencast, min_frame_rate,
-      pan, tilt, zoom, pan_tilt_zoom_allowed, std::move(callback), enabled));
+      pan, tilt, zoom, pan_tilt_zoom_allowed, std::move(callback), enabled,
+      is_local));
   return WebMediaStreamTrack(component);
 }
 
@@ -381,8 +384,9 @@ MediaStreamVideoTrack* MediaStreamVideoTrack::GetVideoTrack(
 MediaStreamVideoTrack::MediaStreamVideoTrack(
     MediaStreamVideoSource* source,
     MediaStreamVideoSource::ConstraintsOnceCallback callback,
-    bool enabled)
-    : MediaStreamTrackPlatform(true),
+    bool enabled,
+    bool is_local)
+    : MediaStreamTrackPlatform(is_local),
       adapter_settings_(std::make_unique<VideoTrackAdapterSettings>(
           VideoTrackAdapterSettings())),
       is_screencast_(false),
@@ -418,8 +422,9 @@ MediaStreamVideoTrack::MediaStreamVideoTrack(
     const base::Optional<double>& zoom,
     bool pan_tilt_zoom_allowed,
     MediaStreamVideoSource::ConstraintsOnceCallback callback,
-    bool enabled)
-    : MediaStreamTrackPlatform(true),
+    bool enabled,
+    bool is_local)
+    : MediaStreamTrackPlatform(is_local),
       adapter_settings_(
           std::make_unique<VideoTrackAdapterSettings>(adapter_settings)),
       noise_reduction_(noise_reduction),
