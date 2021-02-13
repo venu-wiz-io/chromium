@@ -20,7 +20,7 @@ Camera* Camera::Create(ExecutionContext* context) {
 	return MakeGarbageCollected<Camera>(context);
 }
 
-
+/*Camera Setting Constructor*/
 Camera::Camera(ExecutionContext* context)
 	: ExecutionContextClient(context){
 }
