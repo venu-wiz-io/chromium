@@ -1317,6 +1317,8 @@ generated_interface_sources_in_modules = [
   "$root_gen_dir/third_party/blink/renderer/bindings/modules/v8/v8_clients.h",
   "$root_gen_dir/third_party/blink/renderer/bindings/modules/v8/v8_clipboard.cc",
   "$root_gen_dir/third_party/blink/renderer/bindings/modules/v8/v8_clipboard.h",
+  "$root_gen_dir/third_party/blink/renderer/bindings/modules/v8/v8_camera.cc",
+  "$root_gen_dir/third_party/blink/renderer/bindings/modules/v8/v8_camera.h",
   "$root_gen_dir/third_party/blink/renderer/bindings/modules/v8/v8_clipboard_item.cc",
   "$root_gen_dir/third_party/blink/renderer/bindings/modules/v8/v8_clipboard_item.h",
   "$root_gen_dir/third_party/blink/renderer/bindings/modules/v8/v8_close_event.cc",

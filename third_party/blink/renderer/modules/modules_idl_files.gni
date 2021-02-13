@@ -61,6 +61,7 @@ _idl_imports = [
   "//third_party/blink/renderer/modules/cache_storage/idls.gni",
   "//third_party/blink/renderer/modules/canvas/idls.gni",
   "//third_party/blink/renderer/modules/clipboard/idls.gni",
+  "//third_party/blink/renderer/modules/camera/idls.gni",
   "//third_party/blink/renderer/modules/compression/idls.gni",
   "//third_party/blink/renderer/modules/contacts_picker/idls.gni",
   "//third_party/blink/renderer/modules/content_index/idls.gni",
