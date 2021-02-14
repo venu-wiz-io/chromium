@@ -26,9 +26,15 @@ Camera::~Camera() = default;
 
 void Camera::setConfig(CameraSettingJson* cameraSetting_json)
 {
-        std::cout << "Camera::setConfig do_not_disturb "<< cameraSetting_json->doNotDisturb() << std::endl;
-	bool ss = cameraSetting_json->hasDoNotDisturb();
-	std::cout << ss << std::endl;
+	Vector<String> ii = cameraSetting_json->setconfig();
+
+	for(Vector<String>::iterator iter = ii.begin(); iter != ii.end();++iter)
+	{
+		if( iter->Contains("PAN") != 0)
+                	std::cout << "Call Platform PAN function  " << std::endl;
+		if( iter->Contains("ZOOM") != 0)
+                	std::cout << "Call Platform Set function " << std::endl;
+	}
 }
 
 ScriptPromise Camera::getConfig(ScriptState* script_state,Vector<String> config)
