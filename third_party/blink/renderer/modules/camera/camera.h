@@ -33,18 +33,13 @@ class Camera final : public ScriptWrappable,
   Camera(ExecutionContext*);
   ~Camera() override;
 
-  ScriptPromise Get(ScriptState*, const String&);
-  ScriptPromise Set(ScriptState*, const String&);
-
-  void SetConfig(CameraSettingJson* cameraSetting_json);
-  ScriptPromise getConfig(ScriptState* script_state,CameraVizioConfig* Camera_Vizio_Config);
-
-  String saneStringFrom(const String&);
+  void setConfig(CameraSettingJson* cameraSetting_json);
+  ScriptPromise getConfig(ScriptState* script_state,Vector<String> config);
+  void getConfigResponse(ScriptPromiseResolver* resolver,Vector<String> config);
 
   const AtomicString& InterfaceName() const ;
   ExecutionContext* GetExecutionContext() const;
   void Trace(Visitor*) const override;  
-  void setconfig_callback(ScriptPromiseResolver* resolver);
 
 };
 

@@ -4,9 +4,6 @@
 
 
 dictionary CameraVizioConfig {
-    boolean do_not_disturb_camera = false;
-    DOMString profile_name_last = "vizio";
-    DOMString profile_name_first = "vizio";
     sequence<DOMString> configuration;
 };
 
