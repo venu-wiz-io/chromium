@@ -5,6 +5,7 @@
 #include "media/audio/audio_manager_base.h"
 
 #include <memory>
+#include <iostream>
 
 #include "base/bind.h"
 #include "base/bind_helpers.h"
@@ -28,6 +29,7 @@
 
 #include "base/logging.h"
 #include "media/audio/audio_input_stream_data_interceptor.h"
+#include "vizio_sdk_api_wrapper.h"
 
 namespace media {
 
@@ -135,12 +137,41 @@ AudioManagerBase::~AudioManagerBase() {
 
 void AudioManagerBase::GetAudioInputDeviceDescriptions(
     AudioDeviceDescriptions* device_descriptions) {
-  CHECK(GetTaskRunner()->BelongsToCurrentThread());
-  GetAudioDeviceDescriptions(device_descriptions,
-                             &AudioManagerBase::GetAudioInputDeviceNames,
-                             &AudioManagerBase::GetDefaultInputDeviceID,
-                             &AudioManagerBase::GetCommunicationsInputDeviceID,
-                             &AudioManagerBase::GetGroupIDInput);
+#if 0
+  if (media::VizioSDKAPIWrapper::bVizioSDK)
+  {
+      auto sdkApiWrapper = get_vizio_audio_sdk_api_wrapper();
+      auto deviceInfoVec = sdkApiWrapper->GetMicrophoneDevices();
+
+      static auto counter = 0;
+      for (auto& devDesc : deviceInfoVec)
+      {
+          std::cout << "Device: " << counter++
+                    << " device_name: " << devDesc.deviceName 
+                    << " unique_id: " << devDesc.deviceId
+                    << " group_id: " << devDesc.groupId
+                    << std::endl;
+      }
+  }
+  else
+#endif
+  {
+      CHECK(GetTaskRunner()->BelongsToCurrentThread());
+      GetAudioDeviceDescriptions(device_descriptions,
+                                 &AudioManagerBase::GetAudioInputDeviceNames,
+                                 &AudioManagerBase::GetDefaultInputDeviceID,
+                                 &AudioManagerBase::GetCommunicationsInputDeviceID,
+                                 &AudioManagerBase::GetGroupIDInput);
+      static auto counter = 0;
+      for (auto& devDesc : *device_descriptions)
+      {
+          std::cout << "Device: " << counter++
+                    << " device_name: " << devDesc.device_name 
+                    << " unique_id: " << devDesc.unique_id
+                    << " group_id: " << devDesc.group_id
+                    << std::endl;
+      }
+  }
 }
 
 void AudioManagerBase::GetAudioOutputDeviceDescriptions(

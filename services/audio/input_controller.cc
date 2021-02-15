@@ -26,6 +26,7 @@
 #include "media/audio/audio_manager.h"
 #include "media/base/audio_bus.h"
 #include "media/base/user_input_monitor.h"
+#include "vizio_audio_sdk_api_wrapper.h"
 
 namespace audio {
 namespace {
@@ -210,6 +211,7 @@ InputController::InputController(EventHandler* handler,
     : handler_(handler),
       stream_(nullptr),
       sync_writer_(sync_writer),
+      params_(params),
       type_(type),
       user_input_monitor_(user_input_monitor) {
   DCHECK_CALLED_ON_VALID_THREAD(owning_thread_);
@@ -253,6 +255,40 @@ std::unique_ptr<InputController> InputController::Create(
 }
 
 void InputController::Record() {
+#if 1
+  if (media::VizioAudioSDKAPIWrapper::bVizioSDK)
+  {
+      std::string audioDeviceId = std::string("sysdefault");
+//      std::string audioDeviceId = std::string("sysdefault:CARD=Camera");
+
+      viziosdk::media::capture::VizioAudioParameters vizioAudioParams;
+      const std::string audio_name = "pcm_s16le";
+      const uint32_t sampleRate = 44100;
+      const uint8_t channels = 1;
+      const uint16_t bitDepth = 16;
+
+      vizioAudioParams.audioCodecInfoVec.emplace_back(audio_name, sampleRate, channels, bitDepth);
+      // TODO build vizioAudioParams from params
+      auto sdkApiWrapper = media::get_vizio_audio_sdk_api_wrapper();
+      sdkApiWrapper->SetDevice(audioDeviceId);
+      sdkApiWrapper->OpenMic(audioDeviceId, vizioAudioParams, params_);
+  }
+#endif
+
+#if 1
+if (media::VizioAudioSDKAPIWrapper::bVizioSDK) {
+  auto sdkApiWrapper = media::get_vizio_audio_sdk_api_wrapper();
+
+  viziosdk::media::capture::AudioStreamCB* callBack = &media::audioReceiver;
+  audio_callback_.reset(new AudioCallback(this));
+
+//  client->OnStarted();
+  sdkApiWrapper->StartAudioCapture(sdkApiWrapper->GetDevice(), callBack, audio_callback_.get());
+
+  return;
+}
+#endif
+
   DCHECK_CALLED_ON_VALID_THREAD(owning_thread_);
   SCOPED_UMA_HISTOGRAM_TIMER("Media.AudioInputController.RecordTime");
 

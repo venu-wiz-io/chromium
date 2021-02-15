@@ -243,6 +243,8 @@ class InputController final : public StreamMonitor {
   // SyncWriter is used only in low-latency mode for synchronous writing.
   SyncWriter* const sync_writer_;
 
+  media::AudioParameters params_;
+
   StreamType type_;
 
   double max_volume_ = 0.0;

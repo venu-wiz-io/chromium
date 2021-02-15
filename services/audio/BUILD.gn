@@ -61,6 +61,10 @@ source_set("audio") {
     "user_input_monitor.h",
   ]
 
+  include_dirs = [
+    "//third_party/viziosdk",
+  ]
+
   deps = [
     ":testing_api_support",
     "//build:chromecast_buildflags",

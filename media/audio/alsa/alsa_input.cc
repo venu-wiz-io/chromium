@@ -17,6 +17,76 @@
 #include "media/audio/alsa/audio_manager_alsa.h"
 #include "media/audio/audio_manager.h"
 
+namespace {
+
+struct WaveHeader
+{
+        char RIFF_marker[4];
+        uint32_t file_size;
+        char filetype_header[4];
+        char format_marker[4];
+        uint32_t data_header_length;
+        uint16_t format_type;
+        uint16_t number_of_channels;
+        uint32_t sample_rate;
+        uint32_t bytes_per_second;
+        uint16_t bytes_per_frame;
+        uint16_t bits_per_sample;
+};
+
+struct WaveHeader *genericWAVHeader(uint32_t sample_rate, uint16_t bit_depth, uint16_t channels)
+{
+    struct WaveHeader *hdr;
+    hdr = (WaveHeader*) malloc(sizeof(*hdr));
+    if (!hdr)
+        return NULL;
+
+    memcpy(&hdr->RIFF_marker, "RIFF", 4);
+    memcpy(&hdr->filetype_header, "WAVE", 4);
+    memcpy(&hdr->format_marker, "fmt ", 4);
+    hdr->data_header_length = 16;
+    hdr->format_type = 1;
+    hdr->number_of_channels = channels;
+    hdr->sample_rate = sample_rate;
+    hdr->bytes_per_second = sample_rate * channels * bit_depth / 8;
+    hdr->bytes_per_frame = channels * bit_depth / 8;
+    hdr->bits_per_sample = bit_depth;
+
+    return hdr;
+}
+
+int writeWAVHeader(int fd, struct WaveHeader *hdr)
+{
+    if (!hdr)
+        return -1;
+
+    write(fd, &hdr->RIFF_marker, 4);
+    write(fd, &hdr->file_size, 4);
+    write(fd, &hdr->filetype_header, 4);
+    write(fd, &hdr->format_marker, 4);
+    write(fd, &hdr->data_header_length, 4);
+    write(fd, &hdr->format_type, 2);
+    write(fd, &hdr->number_of_channels, 2);
+    write(fd, &hdr->sample_rate, 4);
+    write(fd, &hdr->bytes_per_second, 4);
+    write(fd, &hdr->bytes_per_frame, 2);
+    write(fd, &hdr->bits_per_sample, 2);
+    write(fd, "data", 4);
+
+    uint32_t data_size = hdr->file_size + 8 - 44;
+    write(fd, &data_size, 4);
+
+    return 0;
+}
+
+FILE *audio_fp = nullptr;
+
+const std::string audio_name = "pcm_s16le";
+const uint32_t sampleRate = 44100;
+const uint8_t channels = 1;
+const uint16_t bitDepth = 16;
+} // namespace
+
 namespace media {
 
 static const SampleFormat kSampleFormat = kSampleFormatS16;
@@ -95,6 +165,12 @@ bool AlsaPcmInputStream::Open() {
 }
 
 void AlsaPcmInputStream::Start(AudioInputCallback* callback) {
+#if 0
+    asm("int $3");
+    int a = 3;
+    a++;
+#endif
+
   DCHECK(!callback_ && callback);
   callback_ = callback;
   StartAgc();
@@ -205,6 +281,28 @@ void AlsaPcmInputStream::ReadAudio() {
   while (num_buffers--) {
     int frames_read = wrapper_->PcmReadi(device_handle_, audio_buffer_.get(),
                                          params_.frames_per_buffer());
+#if 1
+    static bool once = true;
+
+    // .wav header
+  if (once) {
+    struct WaveHeader *hdr;
+    hdr = genericWAVHeader(sampleRate, bitDepth, channels);
+
+    auto filedesc = open("/tmp/pcm_audio_prefinal.wav", O_WRONLY | O_CREAT, 0644);
+    writeWAVHeader(filedesc, hdr);
+    close(filedesc);
+
+    audio_fp=fopen("/tmp/pcm_audio_prefinal.wav","ab");
+
+    once = false;
+  }
+
+    LOG(INFO) << "Frames read: " << frames_read;
+    fwrite(audio_buffer_.get(), 2 * params_.frames_per_buffer() /*length*/, 1, audio_fp);
+    fflush(audio_fp);
+    continue;
+#else
     if (frames_read == params_.frames_per_buffer()) {
       audio_bus_->FromInterleaved<SignedInt16SampleTypeTraits>(
           reinterpret_cast<int16_t*>(audio_buffer_.get()),
@@ -236,6 +334,7 @@ void AlsaPcmInputStream::ReadAudio() {
                    << frames_read << " vs. " << params_.frames_per_buffer()
                    << ". Dropping this buffer.";
     }
+#endif
   }
 
   next_read_time_ += buffer_duration_;
