@@ -26,12 +26,14 @@ Camera::~Camera() = default;
 void Camera::setConfig(ScriptState* script_state,
                                                HeapVector<ScriptValue> configs)
 {
-  auto* isolate = script_state->GetIsolate();
   for(auto &param : configs)
   {
-    v8::Local<v8::Value> value = param.V8Value();
-    v8::String::Utf8Value utf8value(isolate, value);
-    LOG(INFO) << "Setting:" << std::string(*utf8value, utf8value.length());
+    v8::Local<v8::String> json_value;
+    if (v8::JSON::Stringify(script_state->GetContext(), param.V8Value().
+                                   As<v8::Object>()).ToLocal(&json_value)) {
+      String json = ToCoreString(json_value);
+      LOG(INFO) << "Setting : " << json;
+    }
   }
 }
 
