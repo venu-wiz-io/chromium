@@ -6,7 +6,7 @@
   Exposed=Window
 ] interface Camera {
     [CallWith=ExecutionContext] constructor();
-    void setConfig(CameraSettingJson details);	
-    [CallWith=ScriptState] Promise<CameraVizioConfig> getConfig(sequence<DOMString> config);
+    [CallWith=ScriptState] void setConfig(sequence<any> config);	
+    [CallWith=ScriptState] Promise<sequence<any>> getConfig(sequence<DOMString> config);
 };
 

@@ -20,8 +20,6 @@ namespace blink {
 class LocalFrame;
 class LocalDOMWindow;
 class ScriptState;
-class CameraVizioConfig;
-class CameraSettingJson;
 
 class Camera final : public ScriptWrappable,
 	                    public ExecutionContextClient{
@@ -33,7 +31,7 @@ class Camera final : public ScriptWrappable,
   Camera(ExecutionContext*);
   ~Camera() override;
 
-  void setConfig(CameraSettingJson* cameraSetting_json);
+  void setConfig(ScriptState* script_state, HeapVector<ScriptValue> configs);
   ScriptPromise getConfig(ScriptState* script_state,Vector<String> config);
 
   const AtomicString& InterfaceName() const ;

@@ -6,8 +6,3 @@ modules_idl_files = [
   "camera.idl",
 ]
 
-modules_dictionary_idl_files = [ 
-  "camera_setting_json.idl",
-  "camera_vizio_config.idl",
-]
-
