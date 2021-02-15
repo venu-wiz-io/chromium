@@ -35,12 +35,13 @@ class Camera final : public ScriptWrappable,
 
   void setConfig(CameraSettingJson* cameraSetting_json);
   ScriptPromise getConfig(ScriptState* script_state,Vector<String> config);
-  void getConfigResponse(ScriptPromiseResolver* resolver,Vector<String> config);
 
   const AtomicString& InterfaceName() const ;
   ExecutionContext* GetExecutionContext() const;
   void Trace(Visitor*) const override;  
-
+private:
+  void getConfigResponse(ScriptPromiseResolver* resolver);
+  HeapVector<ScriptValue> response_values_;
 };
 
 }  // namespace blink

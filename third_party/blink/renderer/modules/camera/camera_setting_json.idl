@@ -5,7 +5,7 @@
 
 
 dictionary CameraSettingJson {
-    sequence<DOMString> setconfig;
+    sequence<DOMString> config;
 };
 
 

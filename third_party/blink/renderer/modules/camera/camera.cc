@@ -12,95 +12,108 @@
 #include "third_party/blink/renderer/modules/camera/camera_vizio_config.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_promise_resolver.h"
 #include "third_party/blink/renderer/core/execution_context/execution_context.h"
+#include "third_party/blink/renderer/bindings/core/v8/v8_object_builder.h"
 
 namespace blink {
 Camera* Camera::Create(ExecutionContext* context) {
-	return MakeGarbageCollected<Camera>(context);
+  return MakeGarbageCollected<Camera>(context);
 }
 
 Camera::Camera(ExecutionContext* context)
-	: ExecutionContextClient(context){
+  : ExecutionContextClient(context){
 }
 
 Camera::~Camera() = default;
 
 void Camera::setConfig(CameraSettingJson* cameraSetting_json)
 {
-	Vector<String> ii = cameraSetting_json->setconfig();
+  Vector<String> ii = cameraSetting_json->config();
 
-	for(Vector<String>::iterator iter = ii.begin(); iter != ii.end();++iter)
-	{
-		if( iter->Contains("PAN") != 0)
-                	std::cout << "Call Platform PAN function  " << std::endl;
-		if( iter->Contains("ZOOM") != 0)
-                	std::cout << "Call Platform Set function " << std::endl;
-	}
+  for(Vector<String>::iterator iter = ii.begin(); iter != ii.end();++iter)
+  {
+    if( iter->Contains("PAN") != 0)
+                  std::cout << "Setting  " << std::endl;
+    if( iter->Contains("ZOOM") != 0)
+                  std::cout << "Call Platform Set function " << std::endl;
+  }
 }
 
-ScriptPromise Camera::getConfig(ScriptState* script_state,Vector<String> config)
+ScriptPromise Camera::getConfig(ScriptState* script_state,
+                                                         Vector<String> config)
 {
-	auto *resolver = MakeGarbageCollected<ScriptPromiseResolver>(script_state);
-        ScriptPromise promise = resolver->Promise();
-	LocalDOMWindow* window = To<LocalDOMWindow>(GetExecutionContext());
-	window->GetTaskRunner(TaskType::kUserInteraction)->PostDelayedTask(
-      	FROM_HERE,
-      	base::BindOnce(&Camera::getConfigResponse,
-                     WrapPersistent(this),WrapPersistent(resolver),config),
-      	base::TimeDelta::FromMilliseconds(50));
-	return promise;
+  auto *resolver = MakeGarbageCollected<ScriptPromiseResolver>(script_state);
+  ScriptPromise promise = resolver->Promise();
+  LocalDOMWindow* window = To<LocalDOMWindow>(GetExecutionContext());
+
+  HeapVector<ScriptValue> response_values;
+
+  for(Vector<String>::iterator iter = config.begin();
+                                                   iter != config.end();++iter)
+  {
+    std::cout << *iter << std::endl;
+    if( iter->Contains("DO_NOT_DISTURB") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+                        .AddString("DO_NOT_DISTURB", "true").GetScriptValue());
+    else if( iter->Contains("ENABLE_CAMERA") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+                        .AddString("ENABLE_CAMERA", "true").GetScriptValue());
+    else if( iter->Contains("EXPOSURE") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+                                .AddString("EXPOSURE", "50").GetScriptValue());
+    else if( iter->Contains("WIDTH") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+                                 .AddString("WIDTH", "1280").GetScriptValue());
+    else if( iter->Contains("HEIGHT") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+                                 .AddString("HEIGHT", "720").GetScriptValue());
+    else if( iter->Contains("ECHO_AND_NOISE_CANCELLATION") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+           .AddString("ECHO_AND_NOISE_CANCELLATION", "Auto").GetScriptValue());
+    else if( iter->Contains("INPUT_MIC_VOLUME") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+                        .AddString("INPUT_MIC_VOLUME", "10").GetScriptValue());
+    else if( iter->Contains("INCOMING_CALL_RING") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+                    .AddString("INCOMING_CALL_RING", "true").GetScriptValue());
+    else if( iter->Contains("INCOMING_CALL_RING_VOLUME") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+               .AddString("INCOMING_CALL_RING_VOLUME", "10").GetScriptValue());
+    else if( iter->Contains("VOICE_CONTROL_NOTIFICATION") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+            .AddString("VOICE_CONTROL_NOTIFICATION", "true").GetScriptValue());
+    else if( iter->Contains("PROFILE_NAME_FIRST") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+                   .AddString("PROFILE_NAME_FIRST", "VIZIO").GetScriptValue());
+    else if( iter->Contains("PROFILE_NAME_LAST") != 0)
+      response_values.push_back(V8ObjectBuilder(script_state)
+                   .AddString("PROFILE_NAME_LAST", "CAMERA").GetScriptValue());
+  }
+  response_values_.swap(response_values);
+
+  window->GetTaskRunner(TaskType::kUserInteraction)->PostDelayedTask(
+        FROM_HERE,
+        base::BindOnce(&Camera::getConfigResponse,
+                     WrapPersistent(this),WrapPersistent(resolver)),
+        base::TimeDelta::FromMilliseconds(100));
+  return promise;
 }
 
-void Camera::getConfigResponse(ScriptPromiseResolver* resolver,Vector<String> config){
-	Vector<String> populate_response;
-	
-	for(Vector<String>::iterator iter = config.begin(); iter != config.end();++iter)
-	{
-		std::cout << *iter << std::endl;
-		if( iter->Contains("DO_NOT_DISTURB") != 0)
-			populate_response.push_back("DO_NOT_DISTURB:ON");
-		else if( iter->Contains("ENABLE_CAMERA") != 0)
-                        populate_response.push_back("ENABLE_CAMERA:ON");
-		else if( iter->Contains("EXPOSURE") != 0)
-                        populate_response.push_back("EXPOSURE:50");
-		else if( iter->Contains("EXPOSURE") != 0)
-                        populate_response.push_back("EXPOSURE:50");
-		else if( iter->Contains("WIDTH") != 0)
-			populate_response.push_back("WIDTH:1280");
-		else if( iter->Contains("HEIGHT") != 0)
-                        populate_response.push_back("HEIGHT:720");
-		else if( iter->Contains("ECHO_AND_NOISE_CANCELLATION") != 0)
-                        populate_response.push_back("ECHO_AND_NOISE_CANCELLATION:1");
-		else if( iter->Contains("INPUT_MIC_VOLUME") != 0)
-                        populate_response.push_back("INPUT_MIC_VOLUME:10");
-		else if( iter->Contains("INCOMING_CALL_RING") != 0)
-			populate_response.push_back("INCOMING_CALL_RING:true");
-		else if( iter->Contains("INCOMING_CALL_RING_VOLUME") != 0)
-                        populate_response.push_back("INCOMING_CALL_RING:10");
-		else if( iter->Contains("VOICE_CONTROL_NOTIFICATION") != 0)
-                        populate_response.push_back("VOICE_CONTROL_NOTIFICATION:true");
-		else if( iter->Contains("PROFILE_NAME_FIRST") != 0)
-                        populate_response.push_back("PROFILE_NAME_FIRST:VIZIO");
-		else if( iter->Contains("PROFILE_LAST_FIRST") != 0)
-                        populate_response.push_back("PROFILE_LAST_FIRST:CAMERA");
-	}
-
-	auto *ptr = CameraVizioConfig::Create();
-	ptr->setConfiguration(populate_response);
-	
-	resolver->Resolve(ptr);
+void Camera::getConfigResponse(ScriptPromiseResolver* resolver){
+  resolver->Resolve(response_values_);
 }
 
 const AtomicString& Camera::InterfaceName() const {
-	return event_target_names::kClipboard;
+  return event_target_names::kClipboard;
 }
 
 ExecutionContext* Camera::GetExecutionContext() const {
-	return ExecutionContextClient::GetExecutionContext();
+  return ExecutionContextClient::GetExecutionContext();
 }
 
 void Camera::Trace(Visitor* visitor) const {
-	ExecutionContextClient::Trace(visitor);
-	ScriptWrappable::Trace(visitor); 
+  visitor->Trace(response_values_);
+  ScriptWrappable::Trace(visitor);
+  ExecutionContextClient::Trace(visitor);
 }
 
 }  // namespace blink
