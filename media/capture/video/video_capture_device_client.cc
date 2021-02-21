@@ -225,6 +225,11 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
 //  VideoPixelFormat pix_format = (format.pixel_format == PIXEL_FORMAT_H264)?
 //                                       PIXEL_FORMAT_H264:PIXEL_FORMAT_I420;
 
+
+printf("YUVAN VideoCaptureDeviceClient::OnIncomingCapturedData\n");
+  VideoPixelFormat pix_format = (format.pixel_format == PIXEL_FORMAT_H264)?
+                                       PIXEL_FORMAT_H264:PIXEL_FORMAT_I420;
+
   if (last_captured_pixel_format_ != format.pixel_format) {
     OnLog("Pixel format: " + VideoPixelFormatToString(format.pixel_format));
     last_captured_pixel_format_ = format.pixel_format;
@@ -268,7 +273,7 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
   const gfx::Size dimensions(destination_width, destination_height);
   Buffer buffer;
   auto reservation_result_code = ReserveOutputBuffer(
-      dimensions, PIXEL_FORMAT_I420, frame_feedback_id, &buffer);
+      dimensions, pix_format, frame_feedback_id, &buffer);
   if (reservation_result_code != ReserveResult::kSucceeded) {
     receiver_->OnFrameDropped(
         ConvertReservationFailureToFrameDropReason(reservation_result_code));
@@ -346,6 +351,7 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
       fourcc_format = libyuv::FOURCC_MJPG;
       break;
     case PIXEL_FORMAT_H264:
+      printf("kiran VideoCaptureDeviceClient::OnIncomingCaptured PIXEL_FORMAT_H264 func %s line %d\n",__func__,__LINE__);
       fourcc_format = libyuv::FOURCC_H264;
       break;
     default:
@@ -379,7 +385,10 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
 #endif  // defined(OS_CHROMEOS)
 
   // libyuv::ConvertToI420 use Rec601 to convert RGB to YUV.
-  if (libyuv::ConvertToI420(
+  if(format.pixel_format == PIXEL_FORMAT_H264) {
+    memcpy(y_plane_data, data, length);
+  }
+  else if (libyuv::ConvertToI420(
           data, length, y_plane_data, yplane_stride, u_plane_data,
           uv_plane_stride, v_plane_data, uv_plane_stride, crop_x, crop_y,
           format.frame_size.width(),
@@ -393,7 +402,7 @@ void VideoCaptureDeviceClient::OnIncomingCapturedData(
   }
 
   const VideoCaptureFormat output_format =
-      VideoCaptureFormat(dimensions, format.frame_rate, PIXEL_FORMAT_I420);
+      VideoCaptureFormat(dimensions, format.frame_rate, pix_format);
   OnIncomingCapturedBufferExt(std::move(buffer), output_format, color_space,
                               reference_time, timestamp, gfx::Rect(dimensions),
                               VideoFrameMetadata());
@@ -679,6 +688,7 @@ void VideoCaptureDeviceClient::OnIncomingCapturedY16Data(
     base::TimeTicks reference_time,
     base::TimeDelta timestamp,
     int frame_feedback_id) {
+	printf("YUVAN VideoCaptureDeviceClient::OnIncomingCapturedH264Data\n");
   Buffer buffer;
   const auto reservation_result_code = ReserveOutputBuffer(
       format.frame_size, PIXEL_FORMAT_Y16, frame_feedback_id, &buffer);

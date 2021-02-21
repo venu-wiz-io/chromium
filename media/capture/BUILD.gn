@@ -112,6 +112,7 @@ source_set("capture_device_specific") {
 
 component("capture_lib") {
   defines = [ "CAPTURE_IMPLEMENTATION" ]
+#  defines += [ "_GLIBCXX_USE_CXX11_ABI=0" ]
   sources = [
     "video/create_video_capture_device_factory.cc",
     "video/create_video_capture_device_factory.h",
@@ -135,6 +136,17 @@ component("capture_lib") {
     "video/video_frame_receiver_on_task_runner.h",
     "video_capturer_source.cc",
     "video_capturer_source.h",
+    "video/vizio_sdk_api_wrapper.cc",
+#    "video/vizio_media_device_sdk_api_impl.cc",
+#    "video/vizio_video_capture_device.cc",
+#    "video/vizio_video_capture_device_factory.cc",
+#    "video/vizio_video_capture_types.cc",
+#    "video/vizio_video_capture_device_client.cc",
+#    "video/vizio_uvc_capture_delegate.cc",
+#    "video/vizio_uvc_capture_device_fd.cc",
+#    "video/vizio_uvc_capture_device_impl.cc",
+#    "video/vizio_camera_device_info.cc",
+#    "video/vizio_sdk_logger.cc",
   ]
 
   public_deps = [
@@ -250,6 +262,10 @@ component("capture_lib") {
   # TODO: As we move to separately version Chrome from ChromeOS, we may need to split
   # these sources into linux, chromeos, and common.
   if (is_linux || is_chromeos) {
+#    libs = [
+#      "vizio_media_device_sdk"
+#      "//third_party/viziosdk/libvizio_media_device_sdk.so"
+#    ]
     sources += [
       "video/linux/camera_config_chromeos.cc",
       "video/linux/camera_config_chromeos.h",
@@ -266,6 +282,15 @@ component("capture_lib") {
       "video/linux/video_capture_device_factory_linux.h",
       "video/linux/video_capture_device_linux.cc",
       "video/linux/video_capture_device_linux.h",
+    ]
+    include_dirs = [
+      "//third_party/viziosdk",
+    ]
+    libs = [
+#      "vizio_media_device_sdk"
+#      "//third_party/viziosdk/libvizio_media_device_sdk.so"
+      "//third_party/viziosdk/libvizio_media_device_sdk.a",
+      "asound",
     ]
   }
 

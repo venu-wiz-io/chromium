@@ -21,6 +21,7 @@
 #include "media/capture/mojom/image_capture_types.h"
 #include "media/capture/video/blob_utils.h"
 #include "media/capture/video/linux/video_capture_device_linux.h"
+#include "vizio_sdk_api_wrapper.h"
 
 using media::mojom::MeteringMode;
 
@@ -257,6 +258,27 @@ void V4L2CaptureDelegate::AllocateAndStart(
     int height,
     float frame_rate,
     std::unique_ptr<VideoCaptureDevice::Client> client) {
+if (media::VizioSDKAPIWrapper::bVizioSDK) {
+  viziosdk::media::capture::CameraParameters params;
+  params.formatInfoVec.emplace_back(std::string("H.264"), 875967048U, width, height, frame_rate);
+  auto sdkApiWrapper = get_vizio_sdk_api_wrapper();
+  printf("Yuvan AllocateAndStart\n");
+  sdkApiWrapper->OpenCamera(device_descriptor_.device_id, params);
+
+  printf("Yuvan AllocateAndStart\n");
+  sleep(1);
+  viziosdk::media::capture::VideoStreamCB* callBack = &media::videoReceiver;
+
+  client->OnStarted();
+  printf("Yuvan calling StartVideoCapture\n");
+  //sleep(1);
+  sdkApiWrapper->StartVideoCapture(device_descriptor_.device_id, callBack, std::move(client));
+
+  printf("Yuvan calling StartVideoCapture done\n");
+  //sleep(1);
+  return;
+}
+
   DCHECK(v4l2_task_runner_->BelongsToCurrentThread());
   DCHECK(client);
   client_ = std::move(client);

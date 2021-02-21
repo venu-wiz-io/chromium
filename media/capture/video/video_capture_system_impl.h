@@ -6,6 +6,7 @@
 #define MEDIA_CAPTURE_VIDEO_VIDEO_CAPTURE_SYSTEM_IMPL_H_
 
 #include "media/capture/video/video_capture_system.h"
+#include "vizio_sdk_api_wrapper.h"
 
 namespace media {
 
@@ -21,6 +22,8 @@ class CAPTURE_EXPORT VideoCaptureSystemImpl : public VideoCaptureSystem {
   void GetDeviceInfosAsync(DeviceInfoCallback result_callback) override;
   std::unique_ptr<VideoCaptureDevice> CreateDevice(
       const std::string& device_id) override;
+
+  std::shared_ptr<media::VizioSDKAPIWrapper> vizio_sdk_api_wrapper_;
 
  private:
   using DeviceEnumQueue = std::list<DeviceInfoCallback>;
