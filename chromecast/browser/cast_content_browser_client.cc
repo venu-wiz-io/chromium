@@ -92,6 +92,7 @@
 #include "ui/display/display.h"
 #include "ui/display/screen.h"
 #include "ui/gl/gl_switches.h"
+#include "vizio_audio_sdk_api_wrapper.h"
 
 #if defined(OS_LINUX) || defined(OS_CHROMEOS) || defined(OS_ANDROID)
 #include "components/crash/content/browser/crash_handler_host_linux.h"
@@ -233,7 +234,8 @@ CastContentBrowserClient::GetVideoResolutionPolicy() {
 }
 
 media::CmaBackendFactory* CastContentBrowserClient::GetCmaBackendFactory() {
-  DCHECK(GetMediaTaskRunner()->BelongsToCurrentThread());
+  if (!::media::VizioAudioSDKAPIWrapper::bVizioSDK)
+      DCHECK(GetMediaTaskRunner()->BelongsToCurrentThread());
   if (!cma_backend_factory_) {
     cma_backend_factory_ = std::make_unique<media::CmaBackendFactoryImpl>(
         media_pipeline_backend_manager());

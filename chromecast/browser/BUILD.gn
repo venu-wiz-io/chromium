@@ -148,6 +148,10 @@ cast_source_set("browser") {
     "webui/constants.h",
   ]
 
+  include_dirs = [
+    "//third_party/viziosdk",
+  ]
+
   if (chromecast_branding == "public") {
     sources += [
       "cast_browser_main_parts_simple.cc",

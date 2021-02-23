@@ -12,7 +12,7 @@ using namespace viziosdk::media::capture;
 #if 1
 namespace {
 
-media::AudioInputStream::AudioInputCallback* client_;
+media::AudioInputStream::AudioInputCallback* client_ = nullptr;
 std::unique_ptr<media::AudioBus> audio_bus_;
 
 #if 0
@@ -109,9 +109,12 @@ void audioReceiver(uint8_t* data,
 
 //      printf("%s length: %d", __func__, length);
 
-      client_->OnData(audio_bus_.get(),
-                        base::TimeTicks::Now(),
-                        1 /*normalized_volume*/);
+      if (client_)
+      {
+          client_->OnData(audio_bus_.get(),
+                          base::TimeTicks::Now(),
+                          1 /*normalized_volume*/);
+      }
 
 #else
 //    viziosdk::DEBUG(__file_line__ + __func__ + " length: " + std::to_string(length));
